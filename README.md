@@ -19,3 +19,9 @@ It supports the following output formats:
 This backend is currently maintained by:
 
 * [vast limits GmbH](https://github.com/vastlimits/)
+
+# Tests
+
+https://github.com/orgs/python-poetry/discussions/1135
+
+poetry run pytest --cov=sigma --cov-report term --cov-report xml:cov.xml -vv

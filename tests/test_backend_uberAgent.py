@@ -2,12 +2,14 @@ import pytest
 from sigma.collection import SigmaCollection
 from sigma.backends.uberAgent import uberAgentBackend
 
+
 @pytest.fixture
 def uberAgent_backend():
     return uberAgentBackend()
 
+
 # TODO: implement tests for some basic queries and their expected results.
-def test_uberAgent_and_expression(uberAgent_backend : uberAgentBackend):
+def test_uberAgent_and_expression(uberAgent_backend: uberAgentBackend):
     assert uberAgent_backend.convert(
         SigmaCollection.from_yaml("""
             title: Test
@@ -21,9 +23,10 @@ def test_uberAgent_and_expression(uberAgent_backend : uberAgentBackend):
                     fieldB: valueB
                 condition: sel
         """)
-    ) == ['<insert expected result here>']
+    ) == ['fieldA == "valueA" and fieldB == "valueB"']
 
-def test_uberAgent_or_expression(uberAgent_backend : uberAgentBackend):
+
+def test_uberAgent_or_expression(uberAgent_backend: uberAgentBackend):
     assert uberAgent_backend.convert(
         SigmaCollection.from_yaml("""
             title: Test
@@ -38,9 +41,11 @@ def test_uberAgent_or_expression(uberAgent_backend : uberAgentBackend):
                     fieldB: valueB
                 condition: 1 of sel*
         """)
-    ) == ['<insert expected result here>']
+    ) == ['fieldA == "valueA" or fieldB == "valueB"']
 
-def test_uberAgent_and_or_expression(uberAgent_backend : uberAgentBackend):
+
+# This 'and' 'or' is simplified to an in expression which is correct.
+def test_uberAgent_and_or_expression(uberAgent_backend: uberAgentBackend):
     assert uberAgent_backend.convert(
         SigmaCollection.from_yaml("""
             title: Test
@@ -58,9 +63,10 @@ def test_uberAgent_and_or_expression(uberAgent_backend : uberAgentBackend):
                         - valueB2
                 condition: sel
         """)
-    ) == ['<insert expected result here>']
+    ) == ['(fieldA in ["valueA1", "valueA2"]) and (fieldB in ["valueB1", "valueB2"])']
 
-def test_uberAgent_or_and_expression(uberAgent_backend : uberAgentBackend):
+
+def test_uberAgent_or_and_expression(uberAgent_backend: uberAgentBackend):
     assert uberAgent_backend.convert(
         SigmaCollection.from_yaml("""
             title: Test
@@ -77,9 +83,11 @@ def test_uberAgent_or_and_expression(uberAgent_backend : uberAgentBackend):
                     fieldB: valueB2
                 condition: 1 of sel*
         """)
-    ) == ['<insert expected result here>']
+    ) == ['fieldA == "valueA1" and fieldB == "valueB1" or fieldA == "valueA2" and fieldB == "valueB2"']
 
-def test_uberAgent_in_expression(uberAgent_backend : uberAgentBackend):
+
+# This 'in' expression cannot be simplified in uAQL as it does not support wildcards using 'in' clause.
+def test_uberAgent_in_expression(uberAgent_backend: uberAgentBackend):
     assert uberAgent_backend.convert(
         SigmaCollection.from_yaml("""
             title: Test
@@ -95,9 +103,10 @@ def test_uberAgent_in_expression(uberAgent_backend : uberAgentBackend):
                         - valueC*
                 condition: sel
         """)
-    ) == ['<insert expected result here>']
+    ) == ['fieldA == "valueA" or fieldA == "valueB" or istartswith(fieldA, "valueC")']
 
-def test_uberAgent_regex_query(uberAgent_backend : uberAgentBackend):
+
+def test_uberAgent_regex_query(uberAgent_backend: uberAgentBackend):
     assert uberAgent_backend.convert(
         SigmaCollection.from_yaml("""
             title: Test
@@ -113,7 +122,8 @@ def test_uberAgent_regex_query(uberAgent_backend : uberAgentBackend):
         """)
     ) == ['<insert expected result here>']
 
-def test_uberAgent_cidr_query(uberAgent_backend : uberAgentBackend):
+
+def test_uberAgent_cidr_query(uberAgent_backend: uberAgentBackend):
     assert uberAgent_backend.convert(
         SigmaCollection.from_yaml("""
             title: Test
@@ -126,24 +136,7 @@ def test_uberAgent_cidr_query(uberAgent_backend : uberAgentBackend):
                     field|cidr: 192.168.0.0/16
                 condition: sel
         """)
-    ) == ['<insert expected result here>']
+    ) == ['istartswith(field, "192.168.")']
 
-def test_uberAgent_field_name_with_whitespace(uberAgent_backend : uberAgentBackend):
-    assert uberAgent_backend.convert(
-        SigmaCollection.from_yaml("""
-            title: Test
-            status: test
-            logsource:
-                category: test_category
-                product: test_product
-            detection:
-                sel:
-                    field name: value
-                condition: sel
-        """)
-    ) == ['<insert expected result here>']
 
 # TODO: implement tests for all backend features that don't belong to the base class defaults, e.g. features that were
-# implemented with custom code, deferred expressions etc.
-
-

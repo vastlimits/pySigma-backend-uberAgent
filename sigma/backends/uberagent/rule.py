@@ -1,10 +1,10 @@
-from sigma.backends.uberAgent.version import Version
+from sigma.pipelines.uberagent.version import Version
 
 
 class MalformedRuleException(Exception):
     """
     MalformedRuleException
-    Helper class to ignore exceptions to malformed rules.
+    Helper class to ignore exceptions.py to malformed rules.
     """
     pass
 
@@ -24,50 +24,49 @@ class Rule:
         self.query = ""
         self.risk_score = 0
         self.description = ""
-        self.sigma_level = ""
         self.annotation = ""
         self.generic_properties = []
         self.platform = ""
         self.author = ""
 
     # Query =
-    # Available since uberAgent 6.0+
+    # Available since uberagent 6.0+
     def set_query(self, query: str):
         """Sets the generated query property."""
         self.query = query
 
     # RuleName =
-    # Available since uberAgent 6.0+
+    # Available since uberagent 6.0+
     def set_name(self, name: str):
         """Sets the RuleName."""
         self.name = name
 
     # Tag =
-    # Available since uberAgent 6.0+
+    # Available since uberagent 6.0+
     def set_tag(self, tag: str):
         """Sets the Tag property."""
         self.tag = tag
 
     # EventType =
-    # Available since uberAgent 6.0+
+    # Available since uberagent 6.0+
     def set_event_type(self, event_type: str):
         """Sets the EventType property."""
         self.event_type = event_type
 
     # RiskScore =
-    # Available since uberAgent 6.0+
+    # Available since uberagent 6.0+
     def set_risk_score(self, risk_score: str):
         """Sets the RiskScore property."""
         self.risk_score = risk_score
 
     # RuleId =
-    # Available since uberAgent 7.0+
+    # Available since uberagent 7.0+
     def set_id(self, rule_id: str):
         """Sets the RuleId property."""
         self.id = rule_id
 
     # Annotation =
-    # Available since uberAgent 7.0+
+    # Available since uberagent 7.0+
     def set_annotation(self, annotation: str):
         """Set the Annotation property."""
         self.annotation = annotation
@@ -75,25 +74,19 @@ class Rule:
     # GenericProperty1 =
     # ..
     # GenericPropertyN =
-    # Available since uberAgent 6.1+
+    # Available since uberagent 6.1+
     def set_generic_properties(self, fields):
         """Set the generic properties. """
         self.generic_properties = fields
 
-    # Not used as configuration setting, but to determine in which file the rule is being saved.
-    # Available since uberAgent 6.0+
-    def set_sigma_level(self, level: str):
-        """Sets the Sigma rule level."""
-        self.sigma_level = level
-
     # Not used as configuration setting, but to comment the rule.
-    # Available since uberAgent 6.0+
+    # Available since uberagent 6.0+
     def set_description(self, description: str):
         """Set the Description property."""
         self.description = description
 
     # Not used as configuration setting, but to comment the rule.
-    # Backported to all uberAgent versions.
+    # Backported to all uberagent versions.
     def set_author(self, author: str):
         """Set the Author property."""
         self.author = author
@@ -101,7 +94,7 @@ class Rule:
     # Used to determine the platform where a rule is being evaluated on.
     # Adds the platform = X configuration to a [ActivityMonitoringRule] stanza.
     #
-    # Available since uberAgent 7.0+
+    # Available since uberagent 7.0+
     def set_platform(self, product: str):
         """Set the platform property. """
         self.platform = product
@@ -120,10 +113,10 @@ class Rule:
     def __str__(self):
         """Builds and returns the [ActivityMonitoringRule] configuration block."""
 
-        # The default is available since uberAgent 6.
+        # The default is available since uberagent 6.
         result = "[ActivityMonitoringRule]\n"
 
-        # Starting with uberAgent 7.1 and newer we slightly change the configuration stanza.
+        # Starting with uberagent 7.1 and newer we slightly change the configuration stanza.
         # Example. [ActivityMonitoringRule platform=Windows] or [ActivityMonitoringRule platform=MacOS]
         if self.version.is_version_7_1_or_newer():
             result = "[ActivityMonitoringRule"
@@ -177,7 +170,7 @@ class Rule:
         if self.event_type == "Reg.Any":
             result += "Hive = HKLM,HKU\n"
 
-        # uberAgent supports generic properties to be added to an activity rule since version 6.1
+        # uberagent supports generic properties to be added to an activity rule since version 6.1
         if self.version.is_version_6_1_or_newer():
             counter = 1
             for prop in self.generic_properties:

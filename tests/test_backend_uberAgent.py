@@ -1,15 +1,16 @@
 import pytest
 from sigma.collection import SigmaCollection
-from sigma.backends.uberAgent import uberAgentBackend
+from sigma.backends.uberagent import uberagent
+from sigma.backends.uberagent.exceptions import MissingPropertyException
 
 
 @pytest.fixture
 def uberAgent_backend():
-    return uberAgentBackend()
+    return uberagent()
 
 
 # TODO: implement tests for some basic queries and their expected results.
-def test_uberAgent_and_expression(uberAgent_backend: uberAgentBackend):
+def test_uberAgent_and_expression(uberAgent_backend: uberagent):
     assert uberAgent_backend.convert(
         SigmaCollection.from_yaml("""
             title: Test
@@ -26,7 +27,7 @@ def test_uberAgent_and_expression(uberAgent_backend: uberAgentBackend):
     ) == ['fieldA == "valueA" and fieldB == "valueB"']
 
 
-def test_uberAgent_or_expression(uberAgent_backend: uberAgentBackend):
+def test_uberAgent_or_expression(uberAgent_backend: uberagent):
     assert uberAgent_backend.convert(
         SigmaCollection.from_yaml("""
             title: Test
@@ -45,7 +46,7 @@ def test_uberAgent_or_expression(uberAgent_backend: uberAgentBackend):
 
 
 # This 'and' 'or' is simplified to an in expression which is correct.
-def test_uberAgent_and_or_expression(uberAgent_backend: uberAgentBackend):
+def test_uberAgent_and_or_expression(uberAgent_backend: uberagent):
     assert uberAgent_backend.convert(
         SigmaCollection.from_yaml("""
             title: Test
@@ -66,7 +67,7 @@ def test_uberAgent_and_or_expression(uberAgent_backend: uberAgentBackend):
     ) == ['(fieldA in ["valueA1", "valueA2"]) and (fieldB in ["valueB1", "valueB2"])']
 
 
-def test_uberAgent_or_and_expression(uberAgent_backend: uberAgentBackend):
+def test_uberAgent_or_and_expression(uberAgent_backend: uberagent):
     assert uberAgent_backend.convert(
         SigmaCollection.from_yaml("""
             title: Test
@@ -87,7 +88,7 @@ def test_uberAgent_or_and_expression(uberAgent_backend: uberAgentBackend):
 
 
 # This 'in' expression cannot be simplified in uAQL as it does not support wildcards using 'in' clause.
-def test_uberAgent_in_expression(uberAgent_backend: uberAgentBackend):
+def test_uberAgent_in_expression(uberAgent_backend: uberagent):
     assert uberAgent_backend.convert(
         SigmaCollection.from_yaml("""
             title: Test
@@ -106,24 +107,7 @@ def test_uberAgent_in_expression(uberAgent_backend: uberAgentBackend):
     ) == ['fieldA == "valueA" or fieldA == "valueB" or istartswith(fieldA, "valueC")']
 
 
-def test_uberAgent_regex_query(uberAgent_backend: uberAgentBackend):
-    assert uberAgent_backend.convert(
-        SigmaCollection.from_yaml("""
-            title: Test
-            status: test
-            logsource:
-                category: test_category
-                product: test_product
-            detection:
-                sel:
-                    fieldA|re: foo.*bar
-                    fieldB: foo
-                condition: sel
-        """)
-    ) == ['<insert expected result here>']
-
-
-def test_uberAgent_cidr_query(uberAgent_backend: uberAgentBackend):
+def test_uberAgent_cidr_query(uberAgent_backend: uberagent):
     assert uberAgent_backend.convert(
         SigmaCollection.from_yaml("""
             title: Test
@@ -139,4 +123,99 @@ def test_uberAgent_cidr_query(uberAgent_backend: uberAgentBackend):
     ) == ['istartswith(field, "192.168.")']
 
 
-# TODO: implement tests for all backend features that don't belong to the base class defaults, e.g. features that were
+def test_uberAgent_null_query(uberAgent_backend: uberagent):
+    assert uberAgent_backend.convert(
+        SigmaCollection.from_yaml("""
+            title: Test
+            status: test
+            logsource:
+                category: test_category
+                product: test_product
+            detection:
+                sel:
+                    field: null
+                condition: sel
+        """)
+    ) == ['isnull(field)']
+
+
+def test_uberAgent_not_null_query(uberAgent_backend: uberagent):
+    assert uberAgent_backend.convert(
+        SigmaCollection.from_yaml("""
+            title: Test
+            status: test
+            logsource:
+                category: test_category
+                product: test_product
+            detection:
+                sel:
+                    field: null
+                condition: not sel
+        """)
+    ) == ['not isnull(field)']
+
+
+def test_uberAgent_regex_query1(uberAgent_backend: uberagent):
+    assert uberAgent_backend.convert(
+        SigmaCollection.from_yaml("""
+            title: Test
+            status: test
+            logsource:
+                category: test_category
+                product: test_product
+            detection:
+                sel:
+                    fieldA|re: foo.*bar
+                    fieldB: foo
+                condition: sel
+        """)
+    ) == ['regex_match(fieldA, r"foo.*bar") and fieldB == "foo"']
+
+
+def test_uberAgent_regex_query2(uberAgent_backend: uberagent):
+    assert uberAgent_backend.convert(
+        SigmaCollection.from_yaml("""
+            title: Test
+            status: test
+            logsource:
+                category: test_category
+                product: test_product
+            detection:
+                sel:
+                    field|re: '[A-Z]'
+                condition: not sel
+        """)
+    ) == ['not regex_match(field, r"[A-Z]")']
+
+
+def test_uberAgent_regex_query3(uberAgent_backend: uberagent):
+    assert uberAgent_backend.convert(
+        SigmaCollection.from_yaml("""
+            title: Test
+            status: test
+            logsource:
+                category: test_category
+                product: test_product
+            detection:
+                sel:
+                    field|re: '"([^"]*)"'
+                condition: not sel
+        """)
+    ) == ['not regex_match(field, r"\\"([^\\"]*)\\"")']
+
+
+def test_uberAgent_wildcard_match_expression(uberAgent_backend: uberagent):
+    assert uberAgent_backend.convert(
+        SigmaCollection.from_yaml("""
+            title: Test
+            status: test
+            logsource:
+                category: test_category
+                product: test_product
+            detection:
+                sel:
+                    field|endswith:
+                      - 'Test*Field'
+                condition: sel
+        """)
+    ) == ['field like "*Test*Field"']

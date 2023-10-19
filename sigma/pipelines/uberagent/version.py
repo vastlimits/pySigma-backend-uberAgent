@@ -6,7 +6,7 @@ UA_VERSION_7_1 = "7.1.0"
 
 # Next upcoming version (version number not yet assigned)
 UA_VERSION_DEVELOP = "develop"
-UA_VERSION_CURRENT_RELEASE = UA_VERSION_7_0
+UA_VERSION_CURRENT_RELEASE = UA_VERSION_7_1
 
 
 class Version:
@@ -48,6 +48,14 @@ class Version:
 
         if (self.is_version_develop() or self.is_version_7_1_or_newer) and platform in platform_per_version[UA_VERSION_DEVELOP]:
             return True
+
+    def reduce_mapping(self, mapping: dict[str]):
+        result: list[str] = []
+        for k in mapping.keys():
+            v = mapping[k]
+            if self.is_field_supported(v):
+                result.append(k)
+        return result
 
     def is_field_supported(self, field) -> bool:
         fields_per_version = {
@@ -140,7 +148,19 @@ class Version:
                 "Image.IsSignedByOSVendor",
                 "Process.IsSignedByOSVendor",
                 "Parent.IsSignedByOSVendor"
-            ]
+            ],
+            UA_VERSION_7_1: [
+                "File.Name",
+                "File.Path",
+                "File.PreviousName",
+                "File.PreviousPath",
+                "File.CreationDate",
+                "File.IsExecutable",
+                "File.PreviousCreationDate",
+                "File.HasExecPermissions",
+                "Reg.Value.Data"
+            ],
+            UA_VERSION_DEVELOP: []
         }
 
         if self.is_version_6_1_or_newer():
@@ -159,11 +179,19 @@ class Version:
         if self.is_version_6_2_or_newer() and field in fields_per_version[UA_VERSION_6_2]:
             return True
 
+        if self.is_version_7_0_or_newer() and field in fields_per_version[UA_VERSION_7_0]:
+            return True
+
+        if self.is_version_7_1_or_newer() and field in fields_per_version[UA_VERSION_7_1]:
+            return True
+
+        if self.is_version_develop() and field in fields_per_version[UA_VERSION_DEVELOP]:
+            return True
+
         return False
 
-    def is_sigma_category_supported(self, category) -> bool:
-        """Returns whether uberAgent ESA knows the given sigma category or not."""
-        event_type = self.convert_category(category)
+    def is_event_type_supported(self, event_type) -> bool:
+        """Returns whether uberagent ESA knows the given sigma category or not."""
         event_types_per_version = {
             UA_VERSION_6_0: [
                 "Process.Start",
@@ -197,6 +225,19 @@ class Version:
                 "Process.CreateRemoteThread",
                 "Process.TamperingEvent"
             ],
+            UA_VERSION_7_0: [
+            ],
+            UA_VERSION_7_1: [
+                "Driver.Load",
+                "File.Create",
+                "File.CreateStream",
+                "File.PipeCreate",
+                "File.PipeConnected",
+                "File.Delete",
+                "File.Rename",
+                "File.Write",
+                "File.Read"
+            ],
             UA_VERSION_DEVELOP: []
         }
 
@@ -209,35 +250,17 @@ class Version:
         if self.is_version_6_2_or_newer() and event_type in event_types_per_version[UA_VERSION_6_2]:
             return True
 
+        if self.is_version_7_0_or_newer() and event_type in event_types_per_version[UA_VERSION_7_0]:
+            return True
+
+        if self.is_version_7_1_or_newer() and event_type in event_types_per_version[UA_VERSION_7_1]:
+            return True
+
         if self.is_version_develop() and event_type in event_types_per_version[UA_VERSION_DEVELOP]:
             return True
 
     def _version(self):
         return self._version_tuple(self._outputVersion)
-
-    @staticmethod
-    def convert_category(category):
-
-        # Maps a sigma category to uberAgent's Activity Monitoring Event Type
-        category_map = {
-            "process_creation": "Process.Start",
-            "image_load": "Image.Load",
-            "dns": "Dns.Query",
-            "dns_query": "Dns.Query",
-            "network_connection": "Net.Any",
-            "firewall": "Net.Any",
-            "create_remote_thread": "Process.CreateRemoteThread",
-            "registry_event": "Reg.Any",
-            "registry_add": "Reg.Any",
-            "registry_delete": "Reg.Any",
-            "registry_set": "Reg.Any",
-            "registry_rename": "Reg.Any"
-        }
-
-        if category in category_map:
-            return category_map[category]
-
-        return None
 
     # Builds a version tuple which works fine as long as we specify the version in Major.Minor.Build.
     # A more efficient and robust way to solve this is using packaging.version but since we dont want to add
@@ -247,15 +270,18 @@ class Version:
     def _version_tuple(v):
         return tuple(map(int, (v.split("."))))
 
+    def __str__(self):
+        return self._outputVersion
+
     def get_filename(self, rule) -> str:
 
         # File name since develop (upcoming version)
         if self.is_version_develop() or self.is_version_7_1_or_newer():
-            return "uberAgent-ESA-am-sigma-" + rule.sigma_level + "-" + rule.platform + ".conf"
+            return "uberagent-ESA-am-sigma-" + rule.sigma_level + "-" + rule.platform + ".conf"
 
         # File name since 6.2
         if self.is_version_6_2_or_newer():
-            return "uberAgent-ESA-am-sigma-" + rule.sigma_level + ".conf"
+            return "uberagent-ESA-am-sigma-" + rule.sigma_level + ".conf"
 
         # File name since initial version 6.0
-        return "uberAgent-ESA-am-sigma-proc-creation-" + rule.sigma_level + ".conf"
+        return "uberagent-ESA-am-sigma-proc-creation-" + rule.sigma_level + ".conf"

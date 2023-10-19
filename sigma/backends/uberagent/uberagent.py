@@ -5,15 +5,16 @@ from typing import ClassVar, Dict, Tuple, Pattern, List, Any, Optional
 from sigma.conditions import ConditionItem, ConditionAND, ConditionOR, ConditionNOT
 from sigma.conversion.base import TextQueryBackend
 from sigma.conversion.state import ConversionState
-from sigma.rule import SigmaRule
+from sigma.rule import SigmaRule, SigmaLevel
 from sigma.types import SigmaCompareExpression, SigmaRegularExpressionFlag
 
-from sigma.backends.uberAgent.rule import Rule
-from sigma.backends.uberAgent.version import Version
+from sigma.backends.uberagent.exceptions import MissingPropertyException
+from sigma.backends.uberagent.rule import Rule
+from sigma.pipelines.uberagent.version import Version
 
 
 def get_mitre_annotation_from_tag(tag):
-    tag = tag.lower()
+    tag = str(tag).lower()
     if tag.startswith('attack.t'):
         return tag[7:].upper()
     return None
@@ -31,14 +32,18 @@ def ua_annotation(tags) -> str:
 
 
 def ua_tag(name: str) -> str:
-    """Converts the given Sigma rule name to uberAgent ESA Tag property."""
+    """Converts the given Sigma rule name to uberagent ESA Tag property."""
     tag = name.lower().replace(" ", "-")
     tag = re.sub(r"-{2,}", "-", tag, 0, re.IGNORECASE)
     return tag
 
 
-def ua_risk_score(level: str) -> int:
-    """Converts the given Sigma rule level to uberAgent ESA RiskScore property."""
+def ua_risk_score(level: SigmaLevel) -> int:
+    """Converts the given Sigma rule level to uberagent ESA RiskScore property."""
+
+    if level is None:
+        return 0
+
     levels = {
         "critical": 100,
         "high": 75,
@@ -47,13 +52,14 @@ def ua_risk_score(level: str) -> int:
         "informational": 1
     }
 
+    level = str(level).lower()
     if level in levels:
         return levels[level]
 
     return 0
 
 
-class uberAgentBackend(TextQueryBackend):
+class uberagent(TextQueryBackend):
     """uAQL backend."""
     # TODO: change the token definitions according to the syntax. Delete these not supported by your backend.
     # See the pySigma documentation for further information:
@@ -121,20 +127,19 @@ class uberAgentBackend(TextQueryBackend):
     contains_expression: ClassVar[str] = "icontains({field}, {value})"
 
     # Special expression if wildcards can't be matched with the eq_token operator
-    # TODO: This requires a test case.
-    wildcard_match_expression: ClassVar[str] = "{field} match {value}"
+    wildcard_match_expression: ClassVar[str] = '{field} like {value}'
 
     # Regular expressions
     # Regular expression query as format string with placeholders {field}, {regex}, {flag_x} where x
     # is one of the flags shortcuts supported by Sigma (currently i, m and s) and refers to the
     # token stored in the class variable re_flags.
-    re_expression: ClassVar[str] = "regex_match({field}, {regex})"
+    re_expression: ClassVar[str] = 'regex_match({field}, r"{regex}")'
 
     # Character used for escaping in regular expressions
     re_escape_char: ClassVar[str] = "\\"
 
     # List of strings that are escaped
-    re_escape: ClassVar[Tuple[str]] = ()
+    re_escape: ClassVar[Tuple[str]] = ('"')
 
     # If True, the escape character is also escaped
     re_escape_escape_char: bool = True
@@ -192,8 +197,7 @@ class uberAgentBackend(TextQueryBackend):
 
     # Null/None expressions
     # Expression for field has null value as format string with {field} placeholder for field name
-    # TODO: Review this
-    field_null_expression: ClassVar[str] = "{field} is null"
+    field_null_expression: ClassVar[str] = "isnull({field})"
 
     # Field existence condition expressions.
     # Expression for field existence as format string with {field} placeholder for field name
@@ -249,6 +253,13 @@ class uberAgentBackend(TextQueryBackend):
     # Documentation: https://sigmahq-pysigma.readthedocs.io/en/latest/Backends.html
 
     def finalize_query_conf(self, rule: SigmaRule, query: str, index: int, state: ConversionState) -> str:
+
+        if rule.id is None or len(str(rule.id)) == 0:
+            raise MissingPropertyException("id")
+
+        if rule.title is None or len(rule.title) == 0:
+            raise MissingPropertyException("title")
+
         # TODO: Use version from settings/configuration/pipeline?
         ua_rule: Rule = Rule(Version("develop"))
         ua_rule.set_query(self.finalize_query_default(rule, query, index, state))
@@ -257,7 +268,6 @@ class uberAgentBackend(TextQueryBackend):
         ua_rule.set_tag(ua_tag(rule.title))
         ua_rule.set_event_type(rule.logsource.category)
         ua_rule.set_risk_score(ua_risk_score(rule.level))
-        ua_rule.set_sigma_level(rule.level)
         ua_rule.set_description(rule.description)
         ua_rule.set_author(rule.author)
         ua_rule.set_annotation(ua_annotation(rule.tags))

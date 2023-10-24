@@ -2,20 +2,20 @@ from dataclasses import dataclass
 from typing import List, Optional, Union
 
 from sigma.exceptions import SigmaTransformationError
-from sigma.pipelines.base import Pipeline
 from sigma.pipelines.common import logsource_windows_process_creation, logsource_windows_image_load, \
     logsource_windows_dns_query, logsource_windows_network_connection, logsource_windows_create_remote_thread, \
     logsource_windows_registry_add, logsource_windows_registry_set, \
     logsource_windows_registry_delete, logsource_windows_registry_event, logsource_windows_driver_load, \
     logsource_windows_file_rename, logsource_windows_file_delete, logsource_windows_file_change, \
     logsource_windows_file_event, logsource_windows_file_access
-from sigma.processing.conditions import ExcludeFieldCondition, IncludeFieldCondition, RuleProcessingCondition, \
+from sigma.processing.conditions import IncludeFieldCondition, RuleProcessingCondition, \
     LogsourceCondition, RuleProcessingItemAppliedCondition
 from sigma.processing.pipeline import ProcessingPipeline, ProcessingItem
 from sigma.processing.transformations import FieldMappingTransformation, \
     DetectionItemTransformation, ChangeLogsourceTransformation, SetStateTransformation, RuleFailureTransformation
 from sigma.rule import SigmaDetectionItem
 
+from sigma.pipelines.uberagent.field import Field
 from sigma.pipelines.uberagent.version import UA_VERSION_6_0, UA_VERSION_6_1, UA_VERSION_6_2, UA_VERSION_7_0, \
     UA_VERSION_7_1, UA_VERSION_DEVELOP, UA_VERSION_CURRENT_RELEASE, Version
 
@@ -30,104 +30,137 @@ class FieldDetectionItemFailureTransformation(DetectionItemTransformation):
         raise SigmaTransformationError(self.message.format(detection_item.field))
 
 
+
+
+
 #
 # Field Mappings
 #
 
-ua_process_creation_mapping: dict[str] = {
-    "image": "Process.Path",
-    "originalfilename": "Process.Name",
-    "commandline": "Process.CommandLine",
-    "parentimage": "Parent.Path",
-    "parentcommandline": "Parent.CommandLine",
-    "company": "Process.Company",
-    "user": "Process.User",
-    "username": "Process.User",
-    "md5": "Process.Hash.MD5",
-    "sha1": "Process.Hash.SHA1",
-    "sha256": "Process.Hash.SHA256",
-    "imphash": "Process.Hash.IMP",
-    "childimage": "Process.Path",
-    "signed": "Process.IsSigned",
-    "hashes": "Process.Hashes",
-    "signaturestatus": "Process.SignatureStatus",
-    "signature": "Process.Signature"
+ua_process_creation_mapping: dict[str, Field] = {
+    "image"                 : Field(UA_VERSION_6_0, "Process.Path"),
+    "childimage"            : Field(UA_VERSION_6_0, "Process.Path"),
+    "originalfilename"      : Field(UA_VERSION_6_0, "Process.Name"),
+    "commandline"           : Field(UA_VERSION_6_0, "Process.CommandLine"),
+    "parentimage"           : Field(UA_VERSION_6_0, "Parent.Path"),
+    "parentcommandline"     : Field(UA_VERSION_6_0, "Parent.CommandLine"),
+    "company"               : Field(UA_VERSION_6_0, "Process.Company"),
+    "user"                  : Field(UA_VERSION_6_0, "Process.User"),
+    "username"              : Field(UA_VERSION_6_0, "Process.User"),
+    "md5"                   : Field(UA_VERSION_6_1, "Process.Hash.MD5"),
+    "sha1"                  : Field(UA_VERSION_6_1, "Process.Hash.SHA1"),
+    "sha256"                : Field(UA_VERSION_6_1, "Process.Hash.SHA256"),
+    "imphash"               : Field(UA_VERSION_6_1, "Process.Hash.IMP"),
+    "signed"                : Field(UA_VERSION_6_1, "Process.IsSigned"),
+    "signature"             : Field(UA_VERSION_6_1, "Process.Signature"),
+    "signaturestatus"       : Field(UA_VERSION_6_1, "Process.SignatureStatus"),
+    # ""                    : Field(UA_VERSION_6_1, "Parent.Hash.MD5")
+    # ""                    : Field(UA_VERSION_6_1, "Parent.Hash.SHA1")
+    # ""                    : Field(UA_VERSION_6_1, "Parent.Hash.SHA256")
+    # ""                    : Field(UA_VERSION_6_1, "Parent.Hash.IMP")
+    # ""                    : Field(UA_VERSION_6_1, "Parent.IsSigned")
+    # ""                    : Field(UA_VERSION_6_1, "Parent.Signature")
+    # ""                    : Field(UA_VERSION_6_1, "Parent.SignatureStatus")
+    # ""                    : Field(UA_VERSION_6_2, "Parent.Hashes")
+    "hashes"                : Field(UA_VERSION_6_2, "Process.Hashes")
 }
 
-ua_image_load_mapping: dict[str] = {
-    "image": "Process.Path",
-    "originalfilename": "Process.Name",
-    "commandline": "Process.CommandLine",
-
-    "md5": "Image.Hash.MD5",
-    "sha1": "Image.Hash.SHA1",
-    "sha256": "Image.Hash.SHA256",
-    "imphash": "Image.Hash.IMP",
-    "childimage": "Image.Path",
-    "imageloaded": "Image.Path",
-    "signed": "Image.IsSigned",
-    "hashes": "Image.Hashes",
-    "signaturestatus": "Image.SignatureStatus",
-    "signature": "Image.Signature"
+ua_image_load_mapping: dict[str, Field] = {
+    "image"                 : Field(UA_VERSION_6_0, "Process.Path"),
+    "childimage"            : Field(UA_VERSION_6_0, "Image.Path"),
+    "imageloaded"           : Field(UA_VERSION_6_0, "Image.Path"),
+    "originalfilename"      : Field(UA_VERSION_6_0, "Process.Name"),
+    "commandline"           : Field(UA_VERSION_6_0, "Process.CommandLine"),
+    "md5"                   : Field(UA_VERSION_6_1, "Image.Hash.MD5"),
+    "sha1"                  : Field(UA_VERSION_6_1, "Image.Hash.SHA1"),
+    "sha256"                : Field(UA_VERSION_6_1, "Image.Hash.SHA256"),
+    "imphash"               : Field(UA_VERSION_6_1, "Image.Hash.IMP"),
+    "signed"                : Field(UA_VERSION_6_1, "Image.IsSigned"),
+    "signature"             : Field(UA_VERSION_6_1, "Image.Signature"),
+    "signaturestatus"       : Field(UA_VERSION_6_1, "Image.SignatureStatus"),
+    "hashes"                : Field(UA_VERSION_6_2, "Image.Hashes")
 }
 
-ua_dns_query_mapping: dict[str] = {
-    "image": "Process.Path",
-    "originalfilename": "Process.Name",
-    "commandline": "Process.CommandLine",
-
-    "query": "Dns.QueryRequest",
-    "queryname": "Dns.QueryRequest",
-    "answer": "Dns.QueryResponse"
+ua_dns_query_mapping: dict[str, Field] = {
+    "image"                 : Field(UA_VERSION_6_0, "Process.Path"),
+    "originalfilename"      : Field(UA_VERSION_6_0, "Process.Name"),
+    "commandline"           : Field(UA_VERSION_6_0, "Process.CommandLine"),
+    "query"                 : Field(UA_VERSION_6_1, "Dns.QueryRequest"),
+    "queryname"             : Field(UA_VERSION_6_1, "Dns.QueryRequest"),
+    "answer"                : Field(UA_VERSION_6_1, "Dns.QueryResponse")
 }
 
-ua_network_connection_mapping: dict[str] = {
-    "image": "Process.Path",
-    "originalfilename": "Process.Name",
-    "commandline": "Process.CommandLine",
-
-    "destinationport": "Net.Target.Port",
-    "destinationip": "Net.Target.Ip",
-    "destinationhostname": "Net.Target.Name",
-    "destinationisipv6": "Net.Target.IpIsV6",
-    "sourceport": "Net.Source.Port"
+ua_network_connection_mapping: dict[str, Field] = {
+    "image"                 : Field(UA_VERSION_6_0, "Process.Path"),
+    "originalfilename"      : Field(UA_VERSION_6_0, "Process.Name"),
+    "commandline"           : Field(UA_VERSION_6_0, "Process.CommandLine"),
+    "destinationip"         : Field(UA_VERSION_6_0, "Net.Target.Ip"),
+    "destinationhostname"   : Field(UA_VERSION_6_0, "Net.Target.Name"),
+    "destinationport"       : Field(UA_VERSION_6_0, "Net.Target.Port"),
+    # ""                    : Field(UA_VERSION_6_2, "Net.Target.PortName")
+    # ""                    : Field(UA_VERSION_6_0, "Net.Target.Protocol")
+    "destinationisipv6"     : Field(UA_VERSION_6_2, "Net.Target.IpIsV6"),
+    # ""                    : Field(UA_VERSION_6_2, "Net.Source.Ip")
+    # ""                    : Field(UA_VERSION_6_2, "Net.Source.Name")
+    "sourceport"            : Field(UA_VERSION_6_2, "Net.Source.Port")
+    # ""                    : Field(UA_VERSION_6_2, "Net.Source.PortName")
+    # ""                    : Field(UA_VERSION_6_2, "Net.Source.IpIsV6")
 }
 
 # StartAddress = Thread.StartAddress = e.g '*0B80'
 # SourceImage = Source.Path
 # SourceParentImage = Source.Parent.Path
 #
-ua_create_remote_thread_mapping: dict[str] = {
-    "targetimage": "Process.Path",
-    "startmodule": "Thread.StartModule",
-    "startfunction": "Thread.StartFunctionName"
+ua_create_remote_thread_mapping: dict[str, Field] = {
+    "targetimage"           : Field(UA_VERSION_6_0, "Process.Path"),
+    "startmodule"           : Field(UA_VERSION_6_2, "Thread.StartModule"),
+    "startfunction"         : Field(UA_VERSION_6_2, "Thread.StartFunctionName"),
+    # ""                    : Field(UA_VERSION_6_2, "Thread.Process.Id")
+    # ""                    : Field(UA_VERSION_6_2, "Thread.Parent.Id")
+    # ""                    : Field(UA_VERSION_6_2, "Thread.StartAddress")
+    # ""                    : Field(UA_VERSION_6_2, "Thread.Timestamp")
 }
 
-ua_registry_event_mapping: dict[str] = {
-    "image": "Process.Path",
-    "originalfilename": "Process.Name",
-    "commandline": "Process.CommandLine",
-
-    "targetobject": "Reg.Key.Target",
-    "newname": "Reg.Key.Path.New",
-    "details": "Reg.Value.Data"
+ua_registry_event_mapping: dict[str, Field] = {
+    "image"                 : Field(UA_VERSION_6_0, "Process.Path"),
+    "originalfilename"      : Field(UA_VERSION_6_0, "Process.Name"),
+    "commandline"           : Field(UA_VERSION_6_0, "Process.CommandLine"),
+    # ""                    : Field(UA_VERSION_6_0, "Reg.Key.Path")
+    # ""                    : Field(UA_VERSION_6_0, "Reg.Key.Name")
+    # ""                    : Field(UA_VERSION_6_0, "Reg.Parent.Key.Path")
+    # ""                    : Field(UA_VERSION_6_0, "Reg.Parent.Key.Path")
+    "newname"               : Field(UA_VERSION_6_0, "Reg.Key.Path.New"),
+    # ""                    : Field(UA_VERSION_6_0, "Reg.Key.Path.Old"),
+    # ""                    : Field(UA_VERSION_6_0, "Reg.Value.Name"),
+    # ""                    : Field(UA_VERSION_6_0, "Reg.File.Name"),
+    # ""                    : Field(UA_VERSION_6_0, "Reg.Key.Sddl"),
+    # ""                    : Field(UA_VERSION_6_0, "Reg.Key.Hive"),
+    "targetobject"          : Field(UA_VERSION_6_2, "Reg.Key.Target"),
+    "details"               : Field(UA_VERSION_7_1, "Reg.Value.Data")
+    # ""                    : Field(UA_VERSION_7_1, "Reg.Value.Type")
 }
 
-ua_file_event_mapping: dict[str] = {
-    "image": "Process.Path",
-    "originalfilename": "Process.Name",
-    "commandline": "Process.CommandLine",
-    "parentimage": "Parent.Path",
-    "parentcommandline": "Parent.CommandLine",
-    "user": "Process.User",
-
-    "targetfilename": "File.Path",
-    "filename": "File.Path",
-    "sourcefilename": "File.PreviousPath"
-
-    # TODO: File.CreationDate, File.PreviousCreationDate time format does not match.
-    # "creationutctime": "File.CreationDate",
-    # "previouscreationutctime": "File.PreviousCreationDate"
+ua_file_event_mapping: dict[str, Field] = {
+    "image"                 : Field(UA_VERSION_6_0, "Process.Path"),
+    "originalfilename"      : Field(UA_VERSION_6_0, "Process.Name"),
+    "commandline"           : Field(UA_VERSION_6_0, "Process.CommandLine"),
+    "parentimage"           : Field(UA_VERSION_6_0, "Parent.Path"),
+    "parentcommandline"     : Field(UA_VERSION_6_0, "Parent.CommandLine"),
+    "user"                  : Field(UA_VERSION_6_0, "Process.User"),
+    # TODO: <creationutctime> Requires UTC String formatting from uberAgent
+    # ""     : Field(UA_VERSION_7_1, "File.CreationDate"),
+    # TODO: This field is only available on macOS
+    # ""                    : Field(UA_VERSION_7_1, "File.HasExecPermissions"),
+    # ""                    : Field(UA_VERSION_7_1, "File.IsExecutable"),
+    # ""                    : Field(UA_VERSION_7_1, "File.Name"),
+    # TODO: <previouscreationutctime> Requires UTC String formatting from uberAgent
+    # TODO: This field is only available on Windows
+    # "" : Field(UA_VERSION_7_1, "File.PreviousCreationDate"),
+    # ""                    : Field(UA_VERSION_7_1, "File.PreviousName"),
+    # ""                    : Field(UA_VERSION_7_1, "File.PreviousPath"),
+    "targetfilename"        : Field(UA_VERSION_7_1, "File.Path"),
+    "filename"              : Field(UA_VERSION_7_1, "File.Path"),
+    "sourcefilename"        : Field(UA_VERSION_7_1, "File.PreviousPath")
 }
 
 
@@ -163,7 +196,7 @@ class uaFieldMappingTransformation(FieldMappingTransformation):
         return super().get_mapping(field.lower())
 
 
-def ua_create_mapping(uaVersion: Version, event_type: str, mapping: dict[str],
+def ua_create_mapping(uaVersion: Version, event_type: str, mapping: dict[str, Field],
                       rule_conditions: List[RuleProcessingCondition]):
     # First, confirm that the given event type is supported.
     if not uaVersion.is_event_type_supported(event_type):
@@ -186,7 +219,7 @@ def ua_create_mapping(uaVersion: Version, event_type: str, mapping: dict[str],
     # Build field transformation. Does not combine multiple fields.
     # Builds each field transformation separately to support state transformation per field.
     for field in keys:
-        transformed_field = mapping[field]
+        transformed_field = str(mapping[field])
         fm: dict[str] = {field: transformed_field}
 
         # Field Transformation: Transform rule field to TDE field name.

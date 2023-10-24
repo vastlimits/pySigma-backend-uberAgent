@@ -1,3 +1,5 @@
+from sigma.pipelines.uberagent.field import Field
+
 UA_VERSION_6_0 = "6.0.0"
 UA_VERSION_6_1 = "6.1.0"
 UA_VERSION_6_2 = "6.2.0"
@@ -49,143 +51,31 @@ class Version:
         if (self.is_version_develop() or self.is_version_7_1_or_newer) and platform in platform_per_version[UA_VERSION_DEVELOP]:
             return True
 
-    def reduce_mapping(self, mapping: dict[str]):
+    def reduce_mapping(self, mapping: dict[str, Field]):
         result: list[str] = []
         for k in mapping.keys():
-            v = mapping[k]
+            v: Field = mapping[k]
             if self.is_field_supported(v):
                 result.append(k)
         return result
 
-    def is_field_supported(self, field) -> bool:
-        fields_per_version = {
-            UA_VERSION_6_0: [
-                "Process.Name",
-                "Parent.Name",
-                "Process.User",
-                "Parent.User",
-                "Process.Path",
-                "Parent.Path",
-                "Process.CommandLine",
-                "Parent.CommandLine",
-                "Process.AppName",
-                "Parent.AppName",
-                "Process.AppVersion",
-                "Parent.AppVersion",
-                "Process.Company",
-                "Parent.Company",
-                "Process.IsElevated",
-                "Parent.IsElevated",
-                "Process.IsProtected",
-                "Parent.IsProtected",
-                "Process.SessionId",
-                "Parent.SessionId",
-                "Process.DirectorySdSddl",
-                "Process.DirectoryUserWritable",
-                "Process.Hash",
-                "Parent.Hash",
-                "Net.Target.Ip",
-                "Net.Target.Name",
-                "Net.Target.Port",
-                "Net.Target.Protocol",
-                "Reg.Key.Path",
-                "Reg.Key.Name",
-                "Reg.Parent.Key.Path",
-                "Reg.Key.Path.New",
-                "Reg.Key.Path.Old",
-                "Reg.Value.Name",
-                "Reg.File.Name",
-                "Reg.Key.Sddl",
-                "Reg.Key.Hive",
-                "Image.Name",
-                "Image.Path",
-                "Image.Hash"
-            ],
-            UA_VERSION_6_1: [
-                "Process.Hash.MD5",
-                "Process.Hash.SHA1",
-                "Process.Hash.SHA256",
-                "Process.Hash.IMP",
-                "Process.IsSigned",
-                "Process.Signature",
-                "Process.SignatureStatus",
-                "Parent.Hash.MD5",
-                "Parent.Hash.SHA1",
-                "Parent.Hash.SHA256",
-                "Parent.Hash.IMP",
-                "Parent.IsSigned",
-                "Parent.Signature",
-                "Parent.SignatureStatus",
-                "Image.Hash.MD5",
-                "Image.Hash.SHA1",
-                "Image.Hash.SHA256",
-                "Image.Hash.IMP",
-                "Image.IsSigned",
-                "Image.Signature",
-                "Image.SignatureStatus"
-            ],
-            UA_VERSION_6_2: [
-                "Net.Target.IpIsV6",
-                "Net.Target.PortName",
-                "Net.Source.Ip",
-                "Net.Source.IpIsV6",
-                "Net.Source.Name",
-                "Net.Source.Port",
-                "Net.Source.PortName",
-                "Thread.Id",
-                "Thread.Timestamp",
-                "Thread.Process.Id",
-                "Thread.Parent.Id",
-                "Thread.StartAddress",
-                "Thread.StartModule",
-                "Thread.StartFunctionName",
-                "Reg.Key.Target",
-                "Process.Hashes",
-                "Parent.Hashes",
-                "Image.Hashes"
-            ],
-            UA_VERSION_7_0: [
-                "Image.IsSignedByOSVendor",
-                "Process.IsSignedByOSVendor",
-                "Parent.IsSignedByOSVendor"
-            ],
-            UA_VERSION_7_1: [
-                "File.Name",
-                "File.Path",
-                "File.PreviousName",
-                "File.PreviousPath",
-                "File.CreationDate",
-                "File.IsExecutable",
-                "File.PreviousCreationDate",
-                "File.HasExecPermissions",
-                "Reg.Value.Data"
-            ],
-            UA_VERSION_DEVELOP: []
-        }
-
-        if self.is_version_6_1_or_newer():
-            # The fields here were removed in version 6.1.0 and replaced with more specific fields.
-            # Remove them if we are generating for a newer version, so we don't generate invalid rules.
-            fields_per_version[UA_VERSION_6_0].remove("Process.Hash")
-            fields_per_version[UA_VERSION_6_0].remove("Parent.Hash")
-            fields_per_version[UA_VERSION_6_0].remove("Image.Hash")
-
-        if field in fields_per_version[UA_VERSION_6_0]:
+    def is_field_supported(self, field: Field) -> bool:
+        if field.version == UA_VERSION_6_0:
             return True
 
-        if self.is_version_6_1_or_newer() and field in fields_per_version[UA_VERSION_6_1]:
+        if self.is_version_6_1_or_newer() and field.version == UA_VERSION_6_1:
             return True
 
-        if self.is_version_6_2_or_newer() and field in fields_per_version[UA_VERSION_6_2]:
+        if self.is_version_6_2_or_newer() and field.version == UA_VERSION_6_2:
             return True
 
-        if self.is_version_7_0_or_newer() and field in fields_per_version[UA_VERSION_7_0]:
+        if self.is_version_7_0_or_newer() and field.version == UA_VERSION_7_0:
             return True
 
-        if self.is_version_7_1_or_newer() and field in fields_per_version[UA_VERSION_7_1]:
+        if self.is_version_7_1_or_newer() and field.version == UA_VERSION_7_1:
             return True
 
-        if self.is_version_develop() and field in fields_per_version[UA_VERSION_DEVELOP]:
+        if self.is_version_develop() and field.version == UA_VERSION_DEVELOP:
             return True
 
         return False
@@ -272,16 +162,3 @@ class Version:
 
     def __str__(self):
         return self._outputVersion
-
-    def get_filename(self, rule) -> str:
-
-        # File name since develop (upcoming version)
-        if self.is_version_develop() or self.is_version_7_1_or_newer():
-            return "uberagent-ESA-am-sigma-" + rule.sigma_level + "-" + rule.platform + ".conf"
-
-        # File name since 6.2
-        if self.is_version_6_2_or_newer():
-            return "uberagent-ESA-am-sigma-" + rule.sigma_level + ".conf"
-
-        # File name since initial version 6.0
-        return "uberagent-ESA-am-sigma-proc-creation-" + rule.sigma_level + ".conf"

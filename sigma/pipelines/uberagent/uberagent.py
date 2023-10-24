@@ -15,6 +15,7 @@ from sigma.processing.transformations import FieldMappingTransformation, \
     DetectionItemTransformation, ChangeLogsourceTransformation, SetStateTransformation, RuleFailureTransformation
 from sigma.rule import SigmaDetectionItem
 
+from sigma.pipelines.uberagent.category import Category
 from sigma.pipelines.uberagent.field import Field
 from sigma.pipelines.uberagent.version import UA_VERSION_6_0, UA_VERSION_6_1, UA_VERSION_6_2, UA_VERSION_7_0, \
     UA_VERSION_7_1, UA_VERSION_DEVELOP, UA_VERSION_CURRENT_RELEASE, Version
@@ -30,14 +31,89 @@ class FieldDetectionItemFailureTransformation(DetectionItemTransformation):
         raise SigmaTransformationError(self.message.format(detection_item.field))
 
 
-
-
-
 #
-# Field Mappings
+# Lists all Threat Detection Engine event types of uberAgent and maps them to Sigma log sources.
+# Some event types of uberAgent are not used in Sigma but if so, uncomment the matching event types and
+# add particular log sources.
 #
+# A full list of available event types is documented here:
+# https://uberagent.com/docs/uberagent/latest/esa-features-configuration/threat-detection-engine/event-types/
+#
+ua_categories: list[Category] = [
+    #
+    # Process & Image Events
+    #
+    Category(UA_VERSION_6_0, "Process.Start", conditions=[logsource_windows_process_creation()]),
+    # Not yet used/mappable: Category(UA_VERSION_6_0, "Process.Stop"),
+    Category(UA_VERSION_6_2, "Process.CreateRemoteThread", conditions=[logsource_windows_create_remote_thread()]),
+    Category(UA_VERSION_6_2, "Process.TamperingEvent", conditions=[LogsourceCondition(category="process_tampering", product="windows")]),
+    Category(UA_VERSION_6_0, "Image.Load", conditions=[logsource_windows_image_load()]),
+    Category(UA_VERSION_7_1, "Driver.Load", conditions=[logsource_windows_driver_load()]),
 
+    #
+    # Network Events
+    #
+    # Not yet used/mappable: Category(UA_VERSION_6_0, "Net.Send"),
+    # Not yet used/mappable: Category(UA_VERSION_6_0, "Net.Receive"),
+    # Not yet used/mappable: Category(UA_VERSION_6_0, "Net.Connect"),
+    # Not yet used/mappable: Category(UA_VERSION_6_0, "Net.Reconnect"),
+    # Not yet used/mappable: Category(UA_VERSION_6_0, "Net.Retransmit"),
+
+    # TODO: Update this missing event type in vlDocs
+    Category(UA_VERSION_6_2, "Net.Any", conditions=[logsource_windows_network_connection()]),
+
+    #
+    # Registry Events
+    #
+    # Not yet used/mappable: Category(UA_VERSION_6_0, "Reg.Key.Create"),
+    # Not yet used/mappable: Category(UA_VERSION_6_0, "Reg.Value.Write"),
+    # Not yet used/mappable: Category(UA_VERSION_6_0, "Reg.Delete"),
+    # Not yet used/mappable: Category(UA_VERSION_6_0, "Reg.Key.Delete"),
+    # Not yet used/mappable: Category(UA_VERSION_6_0, "Reg.Value.Delete"),
+    # Not yet used/mappable: Category(UA_VERSION_6_0, "Reg.Key.SecurityChange"),
+    # Not yet used/mappable: Category(UA_VERSION_6_0, "Reg.Key.Rename"),
+    # Not yet used/mappable: Category(UA_VERSION_6_0, "Reg.Key.SetInformation"),
+    # Not yet used/mappable: Category(UA_VERSION_6_0, "Reg.Key.Load"),
+    # Not yet used/mappable: Category(UA_VERSION_6_0, "Reg.Key.Unload"),
+    # Not yet used/mappable: Category(UA_VERSION_6_0, "Reg.Key.Save"),
+    # Not yet used/mappable: Category(UA_VERSION_6_0, "Reg.Key.Restore"),
+    # Not yet used/mappable: Category(UA_VERSION_6_0, "Reg.Key.Replace"),
+    Category(UA_VERSION_6_0, "Reg.Any", conditions=[
+        logsource_windows_registry_event(),
+        logsource_windows_registry_add(),
+        logsource_windows_registry_delete(),
+        logsource_windows_registry_set()
+    ]),
+
+    #
+    # DNS Query Events
+    #
+    Category(UA_VERSION_6_1, "DNS.Event", conditions=[logsource_windows_dns_query()]),
+
+    #
+    # File System Events
+    #
+    # Not yet used/mappable: Category(UA_VERSION_7_1, "File.ChangeCreationTime"),
+    Category(UA_VERSION_7_1, "File.Create", conditions=[logsource_windows_file_event()]),
+    # Not yet used/mappable: Category(UA_VERSION_7_1, "File.CreateStream"),
+    Category(UA_VERSION_7_1, "File.Delete", conditions=[logsource_windows_file_delete()]),
+    # Not yet used/mappable: Category(UA_VERSION_7_1, "File.PipeCreate"),
+    # Not yet used/mappable: Category(UA_VERSION_7_1, "File.PipeConnected"),
+    # Not yet used/mappable: Category(UA_VERSION_7_1, "File.RawAccessRead"),
+    Category(UA_VERSION_7_1, "File.Rename", conditions=[logsource_windows_file_rename()]),
+    Category(UA_VERSION_7_1, "File.Write", conditions=[logsource_windows_file_change()]),
+    Category(UA_VERSION_7_1, "File.Read", conditions=[logsource_windows_file_access()])
+]
+
+
+# Maps all known Sigma fields to uberAgent Process Event Properties
+# Note: The process properties are re-usable for all event types as all events are linked to a process.
+#
+# Documentation:
+# https://uberagent.com/docs/uberagent/latest/esa-features-configuration/threat-detection-engine/event-properties/common-event-properties/
 ua_process_creation_mapping: dict[str, Field] = {
+    # Common fields.
+    # The fields here are usable in all other event types if supported by Sigma.
     "image"                 : Field(UA_VERSION_6_0, "Process.Path"),
     "childimage"            : Field(UA_VERSION_6_0, "Process.Path"),
     "originalfilename"      : Field(UA_VERSION_6_0, "Process.Name"),
@@ -65,12 +141,18 @@ ua_process_creation_mapping: dict[str, Field] = {
     "hashes"                : Field(UA_VERSION_6_2, "Process.Hashes")
 }
 
+# Maps all known Sigma fields to uberAgent Image Load (or Driver) Event Properties
+#
+# Documentation:
+# https://uberagent.com/docs/uberagent/latest/esa-features-configuration/threat-detection-engine/event-properties/image-load-event-properties/
 ua_image_load_mapping: dict[str, Field] = {
+    # Common
     "image"                 : Field(UA_VERSION_6_0, "Process.Path"),
     "childimage"            : Field(UA_VERSION_6_0, "Image.Path"),
     "imageloaded"           : Field(UA_VERSION_6_0, "Image.Path"),
     "originalfilename"      : Field(UA_VERSION_6_0, "Process.Name"),
     "commandline"           : Field(UA_VERSION_6_0, "Process.CommandLine"),
+    # Image/Driver Load Event
     "md5"                   : Field(UA_VERSION_6_1, "Image.Hash.MD5"),
     "sha1"                  : Field(UA_VERSION_6_1, "Image.Hash.SHA1"),
     "sha256"                : Field(UA_VERSION_6_1, "Image.Hash.SHA256"),
@@ -81,19 +163,35 @@ ua_image_load_mapping: dict[str, Field] = {
     "hashes"                : Field(UA_VERSION_6_2, "Image.Hashes")
 }
 
+# Maps all known Sigma fields to uberAgent DNS Query Event Properties
+#
+# Documentation:
+# https://uberagent.com/docs/uberagent/latest/esa-features-configuration/threat-detection-engine/event-properties/dns-query-event-properties/
 ua_dns_query_mapping: dict[str, Field] = {
+
+    # Common
     "image"                 : Field(UA_VERSION_6_0, "Process.Path"),
     "originalfilename"      : Field(UA_VERSION_6_0, "Process.Name"),
     "commandline"           : Field(UA_VERSION_6_0, "Process.CommandLine"),
+
+    # DNS Query Event
     "query"                 : Field(UA_VERSION_6_1, "Dns.QueryRequest"),
     "queryname"             : Field(UA_VERSION_6_1, "Dns.QueryRequest"),
     "answer"                : Field(UA_VERSION_6_1, "Dns.QueryResponse")
 }
 
+# Maps all known Sigma fields to uberAgent Network Event Properties
+#
+# Documentation:
+# https://uberagent.com/docs/uberagent/latest/esa-features-configuration/threat-detection-engine/event-properties/network-event-properties/
 ua_network_connection_mapping: dict[str, Field] = {
+
+    # Common
     "image"                 : Field(UA_VERSION_6_0, "Process.Path"),
     "originalfilename"      : Field(UA_VERSION_6_0, "Process.Name"),
     "commandline"           : Field(UA_VERSION_6_0, "Process.CommandLine"),
+
+    # Network Event
     "destinationip"         : Field(UA_VERSION_6_0, "Net.Target.Ip"),
     "destinationhostname"   : Field(UA_VERSION_6_0, "Net.Target.Name"),
     "destinationport"       : Field(UA_VERSION_6_0, "Net.Target.Port"),
@@ -107,12 +205,16 @@ ua_network_connection_mapping: dict[str, Field] = {
     # ""                    : Field(UA_VERSION_6_2, "Net.Source.IpIsV6")
 }
 
-# StartAddress = Thread.StartAddress = e.g '*0B80'
-# SourceImage = Source.Path
-# SourceParentImage = Source.Parent.Path
+# Maps all known Sigma fields to uberAgent Remote Thread Event Properties
 #
+# Documentation:
+# https://uberagent.com/docs/uberagent/latest/esa-features-configuration/threat-detection-engine/event-properties/remote-thread-event-properties/
 ua_create_remote_thread_mapping: dict[str, Field] = {
+
+    # Common
     "targetimage"           : Field(UA_VERSION_6_0, "Process.Path"),
+
+    # Thread Event
     "startmodule"           : Field(UA_VERSION_6_2, "Thread.StartModule"),
     "startfunction"         : Field(UA_VERSION_6_2, "Thread.StartFunctionName"),
     # ""                    : Field(UA_VERSION_6_2, "Thread.Process.Id")
@@ -121,10 +223,18 @@ ua_create_remote_thread_mapping: dict[str, Field] = {
     # ""                    : Field(UA_VERSION_6_2, "Thread.Timestamp")
 }
 
+# Maps all known Sigma fields to uberAgent Registry Event Properties
+#
+# Documentation:
+# https://uberagent.com/docs/uberagent/latest/esa-features-configuration/threat-detection-engine/event-properties/registry-event-properties/
 ua_registry_event_mapping: dict[str, Field] = {
+
+    # Common
     "image"                 : Field(UA_VERSION_6_0, "Process.Path"),
     "originalfilename"      : Field(UA_VERSION_6_0, "Process.Name"),
     "commandline"           : Field(UA_VERSION_6_0, "Process.CommandLine"),
+
+    # Registry Event
     # ""                    : Field(UA_VERSION_6_0, "Reg.Key.Path")
     # ""                    : Field(UA_VERSION_6_0, "Reg.Key.Name")
     # ""                    : Field(UA_VERSION_6_0, "Reg.Parent.Key.Path")
@@ -140,13 +250,20 @@ ua_registry_event_mapping: dict[str, Field] = {
     # ""                    : Field(UA_VERSION_7_1, "Reg.Value.Type")
 }
 
+# Maps all known Sigma fields to uberAgent File System Event Properties
+#
+# Documentation:
+# https://uberagent.com/docs/uberagent/latest/esa-features-configuration/threat-detection-engine/event-properties/file-system-activity-event-properties/
 ua_file_event_mapping: dict[str, Field] = {
+    # Common
     "image"                 : Field(UA_VERSION_6_0, "Process.Path"),
     "originalfilename"      : Field(UA_VERSION_6_0, "Process.Name"),
     "commandline"           : Field(UA_VERSION_6_0, "Process.CommandLine"),
     "parentimage"           : Field(UA_VERSION_6_0, "Parent.Path"),
     "parentcommandline"     : Field(UA_VERSION_6_0, "Parent.CommandLine"),
     "user"                  : Field(UA_VERSION_6_0, "Process.User"),
+
+    # File System Event
     # TODO: <creationutctime> Requires UTC String formatting from uberAgent
     # ""     : Field(UA_VERSION_7_1, "File.CreationDate"),
     # TODO: This field is only available on macOS
@@ -332,14 +449,6 @@ def make_pipeline(uaVersion: Version):
                     "File.Read"
                 ])
             )
-
-            # Note: Not directly covered in Sigma; may be available in future.
-            # *ua_create_mapping("File.ChangeCreationTime", ua_file_event_mapping, []),
-            # *ua_create_mapping("File.RawAccessRead", ua_file_event_mapping, []),
-            # *ua_create_mapping("File.CreateStream", ua_file_event_mapping, []),
-            # *ua_create_mapping("File.PipeCreate", ua_file_event_mapping, []),
-            # *ua_create_mapping("File.PipeConnected", ua_file_event_mapping, []),
-
         ]
     )
 

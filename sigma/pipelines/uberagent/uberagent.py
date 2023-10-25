@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import List, Optional, Union
 
 from sigma.exceptions import SigmaTransformationError
 from sigma.pipelines.common import logsource_windows_process_creation, logsource_windows_image_load, \
@@ -8,15 +7,16 @@ from sigma.pipelines.common import logsource_windows_process_creation, logsource
     logsource_windows_registry_delete, logsource_windows_registry_event, logsource_windows_driver_load, \
     logsource_windows_file_rename, logsource_windows_file_delete, logsource_windows_file_change, \
     logsource_windows_file_event, logsource_windows_file_access
-from sigma.processing.conditions import IncludeFieldCondition, RuleProcessingCondition, \
-    LogsourceCondition, RuleProcessingItemAppliedCondition
+from sigma.processing.conditions import LogsourceCondition, RuleProcessingItemAppliedCondition
 from sigma.processing.pipeline import ProcessingPipeline, ProcessingItem
-from sigma.processing.transformations import FieldMappingTransformation, \
-    DetectionItemTransformation, ChangeLogsourceTransformation, SetStateTransformation, RuleFailureTransformation
+from sigma.processing.transformations import DetectionItemTransformation, ChangeLogsourceTransformation, \
+    SetStateTransformation, RuleFailureTransformation
 from sigma.rule import SigmaDetectionItem
 
 from sigma.pipelines.uberagent.category import Category
+from sigma.pipelines.uberagent.condition import ExcludeFieldConditionLowercase, IncludeFieldConditionLowercase
 from sigma.pipelines.uberagent.field import Field
+from sigma.pipelines.uberagent.transformation import FieldMappingTransformationLowercase
 from sigma.pipelines.uberagent.version import UA_VERSION_6_0, UA_VERSION_6_1, UA_VERSION_6_2, UA_VERSION_7_0, \
     UA_VERSION_7_1, UA_VERSION_DEVELOP, UA_VERSION_CURRENT_RELEASE, Version
 
@@ -328,86 +328,74 @@ ua_categories: list[Category] = [
 ]
 
 
-@dataclass
-class uaIncludeFieldCondition(IncludeFieldCondition):
-    """Matches on field name if it is contained in fields list."""
+def ua_create_mapping(uaVersion: Version, category: Category) -> list[ProcessingItem]:
+    """
+    Generate a list of processing items based on supported sigma keys for a given uberAgent version and category.
 
-    def match_field_name(
-            self,
-            pipeline: "sigma.processing.pipeline.ProcessingPipeline",
-            field: Optional[str],
-    ) -> bool:
-        if field is None:
-            return False
-        return field.lower() in [f.lower() for f in self.fields]
+    This function produces a series of processing items that map sigma fields to their
+    respective transformations based on the capabilities of the specified uberAgent version.
+    It first establishes a mapping for unsupported fields, then generates individual
+    transformations for each supported field, and finally applies a log source transformation.
 
+    Parameters:
+    - uaVersion (Version): The version of uberAgent for which the mapping is being created.
+    - category (Category): The category of events for which the mapping is created.
 
-@dataclass
-class uaExcludeFieldCondition(uaIncludeFieldCondition):
-    """Matches on field name if it is not contained in fields list."""
+    Returns:
+    - list[ProcessingItem]: A list of processing items tailored to the given uberAgent version and category.
 
-    def match_field_name(
-            self,
-            pipeline: "sigma.processing.pipeline.ProcessingPipeline",
-            field: Optional[str],
-    ) -> bool:
-        return not super().match_field_name(pipeline, field)
+    Note:
+    - The function currently has a hardcoded platform value ("Windows") for log source transformation,
+      which may need future modification.
+    """
 
-
-@dataclass
-class uaFieldMappingTransformation(FieldMappingTransformation):
-    def get_mapping(self, field: str) -> Union[None, str, List[str]]:
-        return super().get_mapping(field.lower())
-
-
-def ua_create_mapping(uaVersion: Version, category: Category):
-    # Now get a pair of sigma keys that are actually supported in the given version.
+    # Retrieve a list of sigma fields supported by the given version.
     keys: list[str] = uaVersion.reduce_mapping(category.fields)
 
+    # Initialize the list of processing items.
     items: list[ProcessingItem] = [
         ProcessingItem(
             identifier=f"ua_{category.name}_unsupported",
             transformation=FieldDetectionItemFailureTransformation("Cannot transform field <{0}>."),
             rule_conditions=category.conditions,
             rule_condition_linking=any,
-            field_name_conditions=[uaExcludeFieldCondition(fields=keys)]
+            field_name_conditions=[ExcludeFieldConditionLowercase(fields=keys)]
         )
     ]
-    # items: list[ProcessingItem] = []
 
-    # Build field transformation. Does not combine multiple fields.
-    # Builds each field transformation separately to support state transformation per field.
+    # Create individual field transformations for each supported field.
+    # Each field is handled separately to facilitate individual state transformations.
     for field in keys:
         transformed_field = str(category.fields[field])
         fm: dict[str] = {field: transformed_field}
 
-        # Field Transformation: Transform rule field to TDE field name.
+        # Field Transformation: Convert the sigma rule field to its corresponding TDE field name.
         items.append(
             ProcessingItem(
                 identifier=f"ua_{category.name}_field_{field}",
-                transformation=uaFieldMappingTransformation(fm),
+                transformation=FieldMappingTransformationLowercase(fm),
                 rule_conditions=category.conditions,
                 field_name_conditions=[
-                    uaIncludeFieldCondition(fields=[field])
+                    IncludeFieldConditionLowercase(fields=[field])
                 ]
             )
         )
-        # State Transformation: Set the transformed field to pipeline state so that the backend can
-        #                       query the actual used fields. Having this information a list of generic properties
-        #                       can be filled at runtime.
+        # State Transformation: Mark the transformed field in the pipeline state. This enables
+        #                       the backend to retrieve the actual used fields and populate generic
+        #                       properties at runtime.
         items.append(
             ProcessingItem(
                 identifier=f"ua_{category.name}_state{field}",
                 transformation=SetStateTransformation(field, True),
                 rule_conditions=category.conditions,
                 field_name_conditions=[
-                    uaIncludeFieldCondition(fields=[field])
+                    IncludeFieldConditionLowercase(fields=[field])
                 ]
             )
         )
 
-    # Build log source transformation
-    # TODO: Remove the hard-coded "Windows" platform.
+    # Log Source Transformation: Specify the log source category and platform.
+    # NOTE: The "Windows" platform is currently hardcoded and may need modification.
     items.append(
         ProcessingItem(
             identifier=f"ls_{category.name}",
@@ -420,22 +408,42 @@ def ua_create_mapping(uaVersion: Version, category: Category):
 
 
 def make_pipeline(uaVersion: Version):
-    # Hold a list of converted log sources that were converted
+    """
+    Create a processing pipeline for a given uberAgent version.
+
+    This function assembles a pipeline of processing items based on the
+    supported event types for the given version of uberAgent. It also
+    adds a final transformation to filter out unsupported log sources.
+
+    Parameters:
+    - uaVersion (Version): The version of uberAgent to build the pipeline for.
+
+    Returns:
+    - ProcessingPipeline: The assembled processing pipeline.
+    """
+
+    # A list to store converted log sources that have been processed.
     converted_conditions: list[RuleProcessingItemAppliedCondition] = []
 
-    # Hold all processing items for the versioned pipeline
+    # A list to hold all processing items for the version-specific pipeline.
     items: list[ProcessingItem] = []
+
+    # Iterate over the defined categories for uberAgent.
     for category in ua_categories:
-        if not uaVersion.is_event_type_supported(category.name):
+
+        # If the current version of uberAgent doesn't support the event type,
+        # skip the rest of the loop.
+        if not uaVersion.is_event_type_supported(category):
             continue
 
-        # Create mapping for log source and its fields.
+        # Generate and store mappings for each log source and its corresponding fields.
         for item in ua_create_mapping(uaVersion, category):
             items.append(item)
 
+        # Add the name of the converted log source to the list of processed conditions.
         converted_conditions.append(RuleProcessingItemAppliedCondition(f"ls_{category.name}"))
 
-    # Create a final transformation to fail out any log source that is not yet supported.
+    # Add a transformation item to filter out any unsupported log sources.
     items.append(ProcessingItem(
         identifier="ua_log_source_not_supported",
         rule_condition_linking=any,
@@ -444,37 +452,80 @@ def make_pipeline(uaVersion: Version):
         rule_conditions=converted_conditions
     ))
 
+    # Return the assembled pipeline with its configured attributes.
     return ProcessingPipeline(
-        name=f"uberagent {uaVersion}",
+        name=f"uberAgent {uaVersion}",
         allowed_backends={"uberagent"},
         priority=20,
         items=items
     )
 
 
-def uberagent():
+def uberagent() -> ProcessingPipeline:
+    """
+    Create a processing pipeline for the current release version of uberAgent.
+
+    Returns:
+    - ProcessingPipeline: The assembled processing pipeline for the current release version.
+    """
     return make_pipeline(Version(UA_VERSION_CURRENT_RELEASE))
 
 
-def uberagent600():
+def uberagent600() -> ProcessingPipeline:
+    """
+    Create a processing pipeline for version 6.0 of uberAgent.
+
+    Returns:
+    - ProcessingPipeline: The assembled processing pipeline for version 6.0.
+    """
     return make_pipeline(Version(UA_VERSION_6_0))
 
 
-def uberagent610():
+def uberagent610() -> ProcessingPipeline:
+    """
+    Create a processing pipeline for version 6.1 of uberAgent.
+
+    Returns:
+    - ProcessingPipeline: The assembled processing pipeline for version 6.1.
+    """
     return make_pipeline(Version(UA_VERSION_6_1))
 
 
-def uberagent620():
+def uberagent620() -> ProcessingPipeline:
+    """
+    Create a processing pipeline for version 6.2 of uberAgent.
+
+    Returns:
+    - ProcessingPipeline: The assembled processing pipeline for version 6.2.
+    """
     return make_pipeline(Version(UA_VERSION_6_2))
 
 
-def uberagent700():
+def uberagent700() -> ProcessingPipeline:
+    """
+    Create a processing pipeline for version 7.0 of uberAgent.
+
+    Returns:
+    - ProcessingPipeline: The assembled processing pipeline for version 7.0.
+    """
     return make_pipeline(Version(UA_VERSION_7_0))
 
 
-def uberagent710():
+def uberagent710() -> ProcessingPipeline:
+    """
+    Create a processing pipeline for version 7.1 of uberAgent.
+
+    Returns:
+    - ProcessingPipeline: The assembled processing pipeline for version 7.1.
+    """
     return make_pipeline(Version(UA_VERSION_7_1))
 
 
-def uberagent_develop():
+def uberagent_develop() -> ProcessingPipeline:
+    """
+    Create a processing pipeline for the development version of uberAgent.
+
+    Returns:
+    - ProcessingPipeline: The assembled processing pipeline for the development version.
+    """
     return make_pipeline(Version(UA_VERSION_DEVELOP))

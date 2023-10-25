@@ -1,3 +1,4 @@
+from sigma.pipelines.uberagent.category import Category
 from sigma.pipelines.uberagent.field import Field
 
 UA_VERSION_6_0 = "6.0.0"
@@ -39,17 +40,19 @@ class Version:
     def is_version_develop(self) -> bool:
         return self._outputVersion == UA_VERSION_DEVELOP
 
-    def is_sigma_platform_supported(self, platform) -> bool:
+    def is_platform_supported(self, platform) -> bool:
         platform_per_version = {
             UA_VERSION_6_0: ["common", "windows"],
-            UA_VERSION_DEVELOP: ["common", "windows", "macos"]
+            UA_VERSION_7_1: ["common", "windows", "macos"]
         }
 
         if platform in platform_per_version[UA_VERSION_6_0]:
             return True
 
-        if (self.is_version_develop() or self.is_version_7_1_or_newer) and platform in platform_per_version[UA_VERSION_DEVELOP]:
+        if self.is_version_7_1_or_newer() and platform in platform_per_version[UA_VERSION_7_1]:
             return True
+
+        return False
 
     def reduce_mapping(self, mapping: dict[str, Field]):
         result: list[str] = []
@@ -80,73 +83,25 @@ class Version:
 
         return False
 
-    def is_event_type_supported(self, event_type) -> bool:
+    def is_event_type_supported(self, category: Category) -> bool:
         """Returns whether uberagent ESA knows the given sigma category or not."""
-        event_types_per_version = {
-            UA_VERSION_6_0: [
-                "Process.Start",
-                "Process.Stop",
-                "Image.Load",
-                "Net.Send",
-                "Net.Receive",
-                "Net.Connect",
-                "Net.Reconnect",
-                "Net.Retransmit",
-                "Reg.Key.Create",
-                "Reg.Value.Write",
-                "Reg.Delete",
-                "Reg.Key.Delete",
-                "Reg.Value.Delete",
-                "Reg.Key.SecurityChange",
-                "Reg.Key.Rename",
-                "Reg.Key.SetInformation",
-                "Reg.Key.Load",
-                "Reg.Key.Unload",
-                "Reg.Key.Save",
-                "Reg.Key.Restore",
-                "Reg.Key.Replace",
-                "Reg.Any"
-            ],
-            UA_VERSION_6_1: [
-                "DNS.Event"
-            ],
-            UA_VERSION_6_2: [
-                "Net.Any",
-                "Process.CreateRemoteThread",
-                "Process.TamperingEvent"
-            ],
-            UA_VERSION_7_0: [
-            ],
-            UA_VERSION_7_1: [
-                "Driver.Load",
-                "File.Create",
-                "File.CreateStream",
-                "File.PipeCreate",
-                "File.PipeConnected",
-                "File.Delete",
-                "File.Rename",
-                "File.Write",
-                "File.Read"
-            ],
-            UA_VERSION_DEVELOP: []
-        }
 
-        if event_type in event_types_per_version[UA_VERSION_6_0]:
+        if category.version == UA_VERSION_6_0:
             return True
 
-        if self.is_version_6_1_or_newer() and event_type in event_types_per_version[UA_VERSION_6_1]:
+        if self.is_version_6_1_or_newer() and category.version == UA_VERSION_6_1:
             return True
 
-        if self.is_version_6_2_or_newer() and event_type in event_types_per_version[UA_VERSION_6_2]:
+        if self.is_version_6_2_or_newer() and category.version == UA_VERSION_6_2:
             return True
 
-        if self.is_version_7_0_or_newer() and event_type in event_types_per_version[UA_VERSION_7_0]:
+        if self.is_version_7_0_or_newer() and category.version == UA_VERSION_7_0:
             return True
 
-        if self.is_version_7_1_or_newer() and event_type in event_types_per_version[UA_VERSION_7_1]:
+        if self.is_version_7_1_or_newer() and category.version == UA_VERSION_7_1:
             return True
 
-        if self.is_version_develop() and event_type in event_types_per_version[UA_VERSION_DEVELOP]:
+        if self.is_version_develop() and category.version == UA_VERSION_DEVELOP:
             return True
 
     def _version(self):

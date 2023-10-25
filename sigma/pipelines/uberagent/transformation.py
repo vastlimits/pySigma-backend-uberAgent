@@ -75,7 +75,7 @@ class FieldDetectionItemFailureTransformation(DetectionItemTransformation):
 class ReferencedFieldTransformation(Transformation):
     def apply(self, pipeline: "sigma.processing.pipeline.Process", rule: SigmaRule) -> None:
         super().apply(pipeline, rule)
-        fields: list[str] = []
+        fields: List[str] = []
         for key in pipeline.field_mappings.keys():
             value = pipeline.field_mappings[key]
 

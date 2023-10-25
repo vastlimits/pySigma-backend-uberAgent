@@ -11,8 +11,8 @@ class MalformedRuleException(Exception):
 
 class Rule:
     """
-    ThreadDetectionRule
-    This class wraps a [ActivityMonitoringRule] ([ThreadDetectionRule]) configuration stanza.
+    Rule
+    This class wraps a [Rule] configuration stanza.
     """
 
     def __init__(self, version: Version):
@@ -103,7 +103,6 @@ class Rule:
         self.description = description
 
     # Not used as configuration setting, but to comment the rule.
-    # Backported to all uberagent versions.
     def set_author(self, author: str):
         """Set the Author property."""
         self.author = author

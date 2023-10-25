@@ -4,7 +4,7 @@ from sigma.processing.conditions import LogsourceCondition
 from sigma.pipelines.uberagent.field import Field
 
 
-class Category:
+class Logsource:
     """
     Represents a specific category within the uberAgent pipeline.
 

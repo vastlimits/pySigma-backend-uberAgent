@@ -1,7 +1,9 @@
 from dataclasses import dataclass
 from typing import Union, List
 
-from sigma.processing.transformations import FieldMappingTransformation
+from sigma.exceptions import SigmaTransformationError
+from sigma.processing.transformations import FieldMappingTransformation, DetectionItemTransformation
+from sigma.rule import SigmaDetectionItem
 
 
 @dataclass
@@ -33,3 +35,38 @@ class FieldMappingTransformationLowercase(FieldMappingTransformation):
                                        of strings (multiple mappings).
         """
         return super().get_mapping(field.lower())
+
+
+@dataclass
+class FieldDetectionItemFailureTransformation(DetectionItemTransformation):
+    """
+    A transformation that raises an error for a specific Sigma detection item.
+
+    When the transformation is applied, it raises a `SigmaTransformationError` with
+    a specified error message. This class is intended for situations where a detection
+    item is known to be unsupported or problematic and needs to be flagged during
+    processing.
+
+    Attributes:
+    - message (str): The error message template that will be formatted with the
+                     detection item's field and raised as a `SigmaTransformationError`.
+
+    Methods:
+    - apply_detection_item: Applies the transformation to a given Sigma detection item.
+    """
+    message: str
+
+    def apply_detection_item(self, detection_item: SigmaDetectionItem) -> None:
+        """
+        Applies the transformation to the provided detection item.
+
+        This method raises a `SigmaTransformationError` using the `message` attribute
+        formatted with the detection item's field.
+
+        Parameters:
+        - detection_item (SigmaDetectionItem): The Sigma detection item to be transformed.
+
+        Raises:
+        - SigmaTransformationError: Raised with the formatted message.
+        """
+        raise SigmaTransformationError(self.message.format(detection_item.field))

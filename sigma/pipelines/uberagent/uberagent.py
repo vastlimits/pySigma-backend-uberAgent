@@ -1,6 +1,3 @@
-from dataclasses import dataclass
-
-from sigma.exceptions import SigmaTransformationError
 from sigma.pipelines.common import logsource_windows_process_creation, logsource_windows_image_load, \
     logsource_windows_dns_query, logsource_windows_network_connection, logsource_windows_create_remote_thread, \
     logsource_windows_registry_add, logsource_windows_registry_set, \
@@ -9,27 +6,16 @@ from sigma.pipelines.common import logsource_windows_process_creation, logsource
     logsource_windows_file_event, logsource_windows_file_access
 from sigma.processing.conditions import LogsourceCondition, RuleProcessingItemAppliedCondition
 from sigma.processing.pipeline import ProcessingPipeline, ProcessingItem
-from sigma.processing.transformations import DetectionItemTransformation, ChangeLogsourceTransformation, \
+from sigma.processing.transformations import ChangeLogsourceTransformation, \
     SetStateTransformation, RuleFailureTransformation
-from sigma.rule import SigmaDetectionItem
 
-from sigma.pipelines.uberagent.category import Category
 from sigma.pipelines.uberagent.condition import ExcludeFieldConditionLowercase, IncludeFieldConditionLowercase
 from sigma.pipelines.uberagent.field import Field
-from sigma.pipelines.uberagent.transformation import FieldMappingTransformationLowercase
+from sigma.pipelines.uberagent.logsource import Logsource
+from sigma.pipelines.uberagent.transformation import FieldMappingTransformationLowercase, \
+    FieldDetectionItemFailureTransformation
 from sigma.pipelines.uberagent.version import UA_VERSION_6_0, UA_VERSION_6_1, UA_VERSION_6_2, UA_VERSION_7_0, \
     UA_VERSION_7_1, UA_VERSION_DEVELOP, UA_VERSION_CURRENT_RELEASE, Version
-
-
-# TODO: import tests for all implemented pipelines and contained transformations
-# Wrapped from DetectionItemFailureTransformation to output the field name.
-@dataclass
-class FieldDetectionItemFailureTransformation(DetectionItemTransformation):
-    message: str
-
-    def apply_detection_item(self, detection_item: SigmaDetectionItem) -> None:
-        raise SigmaTransformationError(self.message.format(detection_item.field))
-
 
 # Maps all known Sigma fields to uberAgent Process Event Properties
 # Note: The process properties are re-usable for all event types as all events are linked to a process.
@@ -158,23 +144,23 @@ ua_create_remote_thread_mapping: dict[str, Field] = {
 ua_registry_event_mapping: dict[str, Field] = {
 
     # Common
-    "image": Field(UA_VERSION_6_0, "Process.Path"),
-    "originalfilename": Field(UA_VERSION_6_0, "Process.Name"),
-    "commandline": Field(UA_VERSION_6_0, "Process.CommandLine"),
+    "image"                 : Field(UA_VERSION_6_0, "Process.Path"),
+    "originalfilename"      : Field(UA_VERSION_6_0, "Process.Name"),
+    "commandline"           : Field(UA_VERSION_6_0, "Process.CommandLine"),
 
     # Registry Event
     # ""                    : Field(UA_VERSION_6_0, "Reg.Key.Path")
     # ""                    : Field(UA_VERSION_6_0, "Reg.Key.Name")
     # ""                    : Field(UA_VERSION_6_0, "Reg.Parent.Key.Path")
     # ""                    : Field(UA_VERSION_6_0, "Reg.Parent.Key.Path")
-    "newname": Field(UA_VERSION_6_0, "Reg.Key.Path.New"),
+    "newname"               : Field(UA_VERSION_6_0, "Reg.Key.Path.New"),
     # ""                    : Field(UA_VERSION_6_0, "Reg.Key.Path.Old"),
     # ""                    : Field(UA_VERSION_6_0, "Reg.Value.Name"),
     # ""                    : Field(UA_VERSION_6_0, "Reg.File.Name"),
     # ""                    : Field(UA_VERSION_6_0, "Reg.Key.Sddl"),
     # ""                    : Field(UA_VERSION_6_0, "Reg.Key.Hive"),
-    "targetobject": Field(UA_VERSION_6_2, "Reg.Key.Target"),
-    "details": Field(UA_VERSION_7_1, "Reg.Value.Data")
+    "targetobject"          : Field(UA_VERSION_6_2, "Reg.Key.Target"),
+    "details"               : Field(UA_VERSION_7_1, "Reg.Value.Data")
     # ""                    : Field(UA_VERSION_7_1, "Reg.Value.Type")
 }
 
@@ -224,111 +210,111 @@ def logsource_windows_process_tampering():
 # A full list of available event types is documented here:
 # https://uberagent.com/docs/uberagent/latest/esa-features-configuration/threat-detection-engine/event-types/
 #
-ua_categories: list[Category] = [
+ua_categories: list[Logsource] = [
     #
     # Process & Image Events
     #
-    # Not yet used/mappable: Category(UA_VERSION_6_0, "Process.Stop"),
+    # Not yet used/mappable: Logsource(UA_VERSION_6_0, "Process.Stop"),
 
-    Category(UA_VERSION_6_0, "Process.Start",
-             conditions=[logsource_windows_process_creation()],
-             fields=ua_process_creation_mapping),
+    Logsource(UA_VERSION_6_0, "Process.Start",
+              conditions=[logsource_windows_process_creation()],
+              fields=ua_process_creation_mapping),
 
-    Category(UA_VERSION_6_2, "Process.CreateRemoteThread",
-             conditions=[logsource_windows_create_remote_thread()],
-             fields=ua_create_remote_thread_mapping),
+    Logsource(UA_VERSION_6_2, "Process.CreateRemoteThread",
+              conditions=[logsource_windows_create_remote_thread()],
+              fields=ua_create_remote_thread_mapping),
 
-    Category(UA_VERSION_6_2, "Process.TamperingEvent",
-             conditions=[logsource_windows_process_tampering()],
-             fields=ua_process_creation_mapping),
+    Logsource(UA_VERSION_6_2, "Process.TamperingEvent",
+              conditions=[logsource_windows_process_tampering()],
+              fields=ua_process_creation_mapping),
 
-    Category(UA_VERSION_6_0, "Image.Load",
-             conditions=[logsource_windows_image_load()],
-             fields=ua_image_load_mapping),
+    Logsource(UA_VERSION_6_0, "Image.Load",
+              conditions=[logsource_windows_image_load()],
+              fields=ua_image_load_mapping),
 
-    Category(UA_VERSION_7_1, "Driver.Load",
-             conditions=[logsource_windows_driver_load()],
-             fields=ua_image_load_mapping),
+    Logsource(UA_VERSION_7_1, "Driver.Load",
+              conditions=[logsource_windows_driver_load()],
+              fields=ua_image_load_mapping),
 
     #
     # Network Events
     #
-    # Not yet used/mappable: Category(UA_VERSION_6_0, "Net.Send"),
-    # Not yet used/mappable: Category(UA_VERSION_6_0, "Net.Receive"),
-    # Not yet used/mappable: Category(UA_VERSION_6_0, "Net.Connect"),
-    # Not yet used/mappable: Category(UA_VERSION_6_0, "Net.Reconnect"),
-    # Not yet used/mappable: Category(UA_VERSION_6_0, "Net.Retransmit"),
+    # Not yet used/mappable: Logsource(UA_VERSION_6_0, "Net.Send"),
+    # Not yet used/mappable: Logsource(UA_VERSION_6_0, "Net.Receive"),
+    # Not yet used/mappable: Logsource(UA_VERSION_6_0, "Net.Connect"),
+    # Not yet used/mappable: Logsource(UA_VERSION_6_0, "Net.Reconnect"),
+    # Not yet used/mappable: Logsource(UA_VERSION_6_0, "Net.Retransmit"),
 
     # TODO: Update this missing event type in vlDocs
-    Category(UA_VERSION_6_2, "Net.Any",
-             conditions=[logsource_windows_network_connection()],
-             fields=ua_network_connection_mapping),
+    Logsource(UA_VERSION_6_2, "Net.Any",
+              conditions=[logsource_windows_network_connection()],
+              fields=ua_network_connection_mapping),
 
     #
     # Registry Events
     #
-    # Not yet used/mappable: Category(UA_VERSION_6_0, "Reg.Key.Create"),
-    # Not yet used/mappable: Category(UA_VERSION_6_0, "Reg.Value.Write"),
-    # Not yet used/mappable: Category(UA_VERSION_6_0, "Reg.Delete"),
-    # Not yet used/mappable: Category(UA_VERSION_6_0, "Reg.Key.Delete"),
-    # Not yet used/mappable: Category(UA_VERSION_6_0, "Reg.Value.Delete"),
-    # Not yet used/mappable: Category(UA_VERSION_6_0, "Reg.Key.SecurityChange"),
-    # Not yet used/mappable: Category(UA_VERSION_6_0, "Reg.Key.Rename"),
-    # Not yet used/mappable: Category(UA_VERSION_6_0, "Reg.Key.SetInformation"),
-    # Not yet used/mappable: Category(UA_VERSION_6_0, "Reg.Key.Load"),
-    # Not yet used/mappable: Category(UA_VERSION_6_0, "Reg.Key.Unload"),
-    # Not yet used/mappable: Category(UA_VERSION_6_0, "Reg.Key.Save"),
-    # Not yet used/mappable: Category(UA_VERSION_6_0, "Reg.Key.Restore"),
-    # Not yet used/mappable: Category(UA_VERSION_6_0, "Reg.Key.Replace"),
+    # Not yet used/mappable: Logsource(UA_VERSION_6_0, "Reg.Key.Create"),
+    # Not yet used/mappable: Logsource(UA_VERSION_6_0, "Reg.Value.Write"),
+    # Not yet used/mappable: Logsource(UA_VERSION_6_0, "Reg.Delete"),
+    # Not yet used/mappable: Logsource(UA_VERSION_6_0, "Reg.Key.Delete"),
+    # Not yet used/mappable: Logsource(UA_VERSION_6_0, "Reg.Value.Delete"),
+    # Not yet used/mappable: Logsource(UA_VERSION_6_0, "Reg.Key.SecurityChange"),
+    # Not yet used/mappable: Logsource(UA_VERSION_6_0, "Reg.Key.Rename"),
+    # Not yet used/mappable: Logsource(UA_VERSION_6_0, "Reg.Key.SetInformation"),
+    # Not yet used/mappable: Logsource(UA_VERSION_6_0, "Reg.Key.Load"),
+    # Not yet used/mappable: Logsource(UA_VERSION_6_0, "Reg.Key.Unload"),
+    # Not yet used/mappable: Logsource(UA_VERSION_6_0, "Reg.Key.Save"),
+    # Not yet used/mappable: Logsource(UA_VERSION_6_0, "Reg.Key.Restore"),
+    # Not yet used/mappable: Logsource(UA_VERSION_6_0, "Reg.Key.Replace"),
 
-    Category(UA_VERSION_6_0, "Reg.Any",
-             conditions=[
+    Logsource(UA_VERSION_6_0, "Reg.Any",
+              conditions=[
                  logsource_windows_registry_event(),
                  logsource_windows_registry_add(),
                  logsource_windows_registry_delete(),
                  logsource_windows_registry_set()
              ],
-             fields=ua_registry_event_mapping),
+              fields=ua_registry_event_mapping),
 
     #
     # DNS Query Events
     #
-    Category(UA_VERSION_6_1, "Dns.Query",
-             conditions=[logsource_windows_dns_query()],
-             fields=ua_dns_query_mapping),
+    Logsource(UA_VERSION_6_1, "Dns.Query",
+              conditions=[logsource_windows_dns_query()],
+              fields=ua_dns_query_mapping),
 
     #
     # File System Events
     #
-    # Not yet used/mappable: Category(UA_VERSION_7_1, "File.ChangeCreationTime"),
-    # Not yet used/mappable: Category(UA_VERSION_7_1, "File.CreateStream"),
-    # Not yet used/mappable: Category(UA_VERSION_7_1, "File.PipeCreate"),
-    # Not yet used/mappable: Category(UA_VERSION_7_1, "File.PipeConnected"),
-    # Not yet used/mappable: Category(UA_VERSION_7_1, "File.RawAccessRead"),
+    # Not yet used/mappable: Logsource(UA_VERSION_7_1, "File.ChangeCreationTime"),
+    # Not yet used/mappable: Logsource(UA_VERSION_7_1, "File.CreateStream"),
+    # Not yet used/mappable: Logsource(UA_VERSION_7_1, "File.PipeCreate"),
+    # Not yet used/mappable: Logsource(UA_VERSION_7_1, "File.PipeConnected"),
+    # Not yet used/mappable: Logsource(UA_VERSION_7_1, "File.RawAccessRead"),
 
-    Category(UA_VERSION_7_1, "File.Create",
-             conditions=[logsource_windows_file_event()],
-             fields=ua_file_event_mapping),
+    Logsource(UA_VERSION_7_1, "File.Create",
+              conditions=[logsource_windows_file_event()],
+              fields=ua_file_event_mapping),
 
-    Category(UA_VERSION_7_1, "File.Delete",
-             conditions=[logsource_windows_file_delete()],
-             fields=ua_file_event_mapping),
+    Logsource(UA_VERSION_7_1, "File.Delete",
+              conditions=[logsource_windows_file_delete()],
+              fields=ua_file_event_mapping),
 
-    Category(UA_VERSION_7_1, "File.Rename",
-             conditions=[logsource_windows_file_rename()],
-             fields=ua_file_event_mapping),
+    Logsource(UA_VERSION_7_1, "File.Rename",
+              conditions=[logsource_windows_file_rename()],
+              fields=ua_file_event_mapping),
 
-    Category(UA_VERSION_7_1, "File.Write",
-             conditions=[logsource_windows_file_change()],
-             fields=ua_file_event_mapping),
+    Logsource(UA_VERSION_7_1, "File.Write",
+              conditions=[logsource_windows_file_change()],
+              fields=ua_file_event_mapping),
 
-    Category(UA_VERSION_7_1, "File.Read",
-             conditions=[logsource_windows_file_access()],
-             fields=ua_file_event_mapping)
+    Logsource(UA_VERSION_7_1, "File.Read",
+              conditions=[logsource_windows_file_access()],
+              fields=ua_file_event_mapping)
 ]
 
 
-def ua_create_mapping(uaVersion: Version, category: Category) -> list[ProcessingItem]:
+def ua_create_mapping(uaVersion: Version, category: Logsource) -> list[ProcessingItem]:
     """
     Generate a list of processing items based on supported sigma keys for a given uberAgent version and category.
 
@@ -433,7 +419,7 @@ def make_pipeline(uaVersion: Version):
 
         # If the current version of uberAgent doesn't support the event type,
         # skip the rest of the loop.
-        if not uaVersion.is_event_type_supported(category):
+        if not uaVersion.is_logsource_supported(category):
             continue
 
         # Generate and store mappings for each log source and its corresponding fields.

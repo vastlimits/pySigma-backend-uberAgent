@@ -1,21 +1,41 @@
-from sigma.pipelines.uberagent.category import Category
+from sigma.pipelines.uberagent.logsource import Logsource
 from sigma.pipelines.uberagent.field import Field
 
+# Constants representing various versions of uberAgent
 UA_VERSION_6_0 = "6.0.0"
 UA_VERSION_6_1 = "6.1.0"
 UA_VERSION_6_2 = "6.2.0"
 UA_VERSION_7_0 = "7.0.0"
 UA_VERSION_7_1 = "7.1.0"
 
-# Next upcoming version (version number not yet assigned)
+# Represents the next upcoming version (version number not yet assigned)
 UA_VERSION_DEVELOP = "develop"
 UA_VERSION_CURRENT_RELEASE = UA_VERSION_7_1
 
 
 class Version:
+    """
+    Represents a version of uberAgent.
+
+    This class facilitates the comparison of uberAgent versions and checking
+    compatibility/support for various platforms, logsources, and fields.
+
+    Attributes:
+    - _outputVersion (str): Internal representation of the uberAgent version.
+
+    Methods:
+    - Various utility methods to check if the current version is greater than
+      or equal to specific versions.
+    - Methods to check if a platform, field, or logsource is supported by
+      the current version.
+    """
     def __init__(self, version: str):
-        # It is possible to initialize version with Major.Minor, e.g: 6.0, 7.0
-        # However, internally we need build number. Simply append it.
+        """
+        Initialize a Version instance based on a provided version string.
+
+        Parameters:
+        - version (str): The version of uberAgent to be represented.
+        """
         if version.count('.') == 1:
             version += ".0"
         elif version == "main":
@@ -25,6 +45,7 @@ class Version:
 
         self._outputVersion = version
 
+    # Various methods to check version compatibility
     def is_version_6_1_or_newer(self) -> bool:
         return self.is_version_develop() or self._version() >= self._version_tuple(UA_VERSION_6_1)
 
@@ -41,6 +62,15 @@ class Version:
         return self._outputVersion == UA_VERSION_DEVELOP
 
     def is_platform_supported(self, platform) -> bool:
+        """
+        Check if a given platform is supported by the current uberAgent version.
+
+        Parameters:
+        - platform (str): The platform to check support for.
+
+        Returns:
+        - bool: True if supported, False otherwise.
+        """
         platform_per_version = {
             UA_VERSION_6_0: ["common", "windows"],
             UA_VERSION_7_1: ["common", "windows", "macos"]
@@ -55,6 +85,15 @@ class Version:
         return False
 
     def reduce_mapping(self, mapping: dict[str, Field]):
+        """
+        Reduces a mapping to only include fields supported by the current version.
+
+        Parameters:
+        - mapping (dict[str, Field]): Mapping of fields.
+
+        Returns:
+        - list[str]: List of field keys supported by the current version.
+        """
         result: list[str] = []
         for k in mapping.keys():
             v: Field = mapping[k]
@@ -63,6 +102,17 @@ class Version:
         return result
 
     def is_field_supported(self, field: Field) -> bool:
+        """
+        Determines if the given field is supported by the current version of uberAgent.
+
+        This method checks if the field's version is compatible with the current uberAgent version.
+
+        Parameters:
+        - field (Field): The field object whose compatibility needs to be checked.
+
+        Returns:
+        - bool: True if the field is supported by the current version, False otherwise.
+        """
         if field.version == UA_VERSION_6_0:
             return True
 
@@ -83,37 +133,63 @@ class Version:
 
         return False
 
-    def is_event_type_supported(self, category: Category) -> bool:
-        """Returns whether uberagent ESA knows the given sigma category or not."""
+    def is_logsource_supported(self, logsource: Logsource) -> bool:
+        """
+        Determines if the given logsource is known and supported by the current version of uberAgent ESA.
 
-        if category.version == UA_VERSION_6_0:
+        This method checks if the logsource's version is compatible with the current uberAgent version.
+
+        Parameters:
+        - logsource (Logsource): The logsource object whose compatibility needs to be checked.
+
+        Returns:
+        - bool: True if the logsource is supported by the current version, False otherwise.
+        """
+        if logsource.version == UA_VERSION_6_0:
             return True
 
-        if self.is_version_6_1_or_newer() and category.version == UA_VERSION_6_1:
+        if self.is_version_6_1_or_newer() and logsource.version == UA_VERSION_6_1:
             return True
 
-        if self.is_version_6_2_or_newer() and category.version == UA_VERSION_6_2:
+        if self.is_version_6_2_or_newer() and logsource.version == UA_VERSION_6_2:
             return True
 
-        if self.is_version_7_0_or_newer() and category.version == UA_VERSION_7_0:
+        if self.is_version_7_0_or_newer() and logsource.version == UA_VERSION_7_0:
             return True
 
-        if self.is_version_7_1_or_newer() and category.version == UA_VERSION_7_1:
+        if self.is_version_7_1_or_newer() and logsource.version == UA_VERSION_7_1:
             return True
 
-        if self.is_version_develop() and category.version == UA_VERSION_DEVELOP:
+        if self.is_version_develop() and logsource.version == UA_VERSION_DEVELOP:
             return True
 
     def _version(self):
+        """
+        Convert the version string into a tuple of integers for easier comparison.
+
+        Returns:
+        - tuple: The version as a tuple of integers.
+        """
         return self._version_tuple(self._outputVersion)
 
-    # Builds a version tuple which works fine as long as we specify the version in Major.Minor.Build.
-    # A more efficient and robust way to solve this is using packaging.version but since we dont want to add
-    # more dependencies to sigmac were using this method.
-    # Because we specify versions in the same format, this is going to be fine.
     @staticmethod
     def _version_tuple(v):
+        """
+        Convert a version string into a tuple of integers.
+
+        Parameters:
+        - v (str): Version string to be converted.
+
+        Returns:
+        - tuple: The version as a tuple of integers.
+        """
         return tuple(map(int, (v.split("."))))
 
     def __str__(self):
+        """
+        Return the string representation of the Version object, which is its version string.
+
+        Returns:
+        - str: The version string.
+        """
         return self._outputVersion

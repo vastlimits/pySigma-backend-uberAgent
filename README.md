@@ -28,17 +28,28 @@ This backend is currently maintained by:
 This backend provides integration with the  [sigma-cli](https://github.com/SigmaHQ/sigma-cli) toolkit.
 While the sigma-cli's official documentation offers a comprehensive understanding of its functionalities, this guide specifically focuses on its usage in conjunction with the uberAgent backend.
 
-Install the uberAgent backend run:
+Install the uberAgent backend:
+
 ```
-sigma plugin install uberagent
+poetry add pySigma-backend-uberAgent
 ```
 
-To list all available plugins run the following command:
-```
-sigma plugin list
-```
+Verify installation with:
 
-The output should list uberAgent as installed backend.
+```
+sigma list pipelines
++-------------------+----------+---------------------+-----------+
+| Identifier        | Priority | Processing Pipeline | Backends  |
++-------------------+----------+---------------------+-----------+
+| uberagent         | 20       | uberAgent 7.1.0     | uberagent |
+| uberagent-6.0.0   | 20       | uberAgent 6.0.0     | uberagent |
+| uberagent-6.1.0   | 20       | uberAgent 6.1.0     | uberagent |
+| uberagent-6.2.0   | 20       | uberAgent 6.2.0     | uberagent |
+| uberagent-7.0.0   | 20       | uberAgent 7.0.0     | uberagent |
+| uberagent-7.1.0   | 20       | uberAgent 7.1.0     | uberagent |
+| uberagent-develop | 20       | uberAgent develop   | uberagent |
++-------------------+----------+---------------------+-----------+
+```
 
 ```
 +----------------------+----------+---------+--------------------------------------------------------------+-------------+
@@ -52,7 +63,7 @@ The output should list uberAgent as installed backend.
 To translate the `process_creation` rules for the most recent version of uberAgent, use the following command:
 
 ```
-sigma convert -s -f conf -p uberagent -t uberagent "D:\Github\sigma\rules\windows\process_creation\" > process_creation.conf
+sigma convert -s -f conf -p uberagent -t uberagent "..\sigma\rules\windows\process_creation\" > process_creation.conf
 ```
 
 Here,
@@ -65,7 +76,7 @@ If you aim to support a prior version of uberAgent, specify the desired version 
 For instance:
 
 ```
-sigma convert -s -f conf -p uberagent-7.0.0 -t uberagent "D:\Github\sigma\rules\windows\process_creation\" > process_creation.conf
+sigma convert -s -f conf -p uberagent-7.0.0 -t uberagent "..\sigma\rules\windows\process_creation\" > process_creation.conf
 ```
 
 This command will generate configurations compatible with uberAgent version 7.0.0, rather than the most recent release.

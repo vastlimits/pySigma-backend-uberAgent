@@ -1,3 +1,5 @@
+from typing import List
+
 from sigma.pipelines.uberagent.version import Version
 
 
@@ -75,7 +77,7 @@ class Rule:
     # ..
     # GenericPropertyN =
     # Available since uberagent 6.1+
-    def set_generic_properties(self, fields: list[str]) -> None:
+    def set_generic_properties(self, fields: List[str]) -> None:
         """
         Set the generic properties.
 
@@ -83,7 +85,7 @@ class Rule:
         all tagging events to avoid redundancy and sorts the fields by name.
 
         Parameters:
-        - fields (list[str]): List of fields to be considered as generic properties.
+        - fields (List[str]): List of fields to be considered as generic properties.
 
         Notes:
         - Properties such as "Process.Path", "Process.CommandLine", and "Process.Name"

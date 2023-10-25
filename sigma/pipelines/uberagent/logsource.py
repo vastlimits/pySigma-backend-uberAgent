@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Dict
 
 from sigma.processing.conditions import LogsourceCondition
 from sigma.pipelines.uberagent.field import Field
@@ -16,13 +16,13 @@ class Logsource:
     - version (str): The version of uberAgent associated with this category.
     - name (str): The name of the category.
     - conditions (List[LogsourceCondition]): A list of conditions associated with the category.
-    - fields (dict[str, Field]): A mapping of field names to their respective Field objects.
+    - fields (Dict[str, Field]): A mapping of field names to their respective Field objects.
 
     Methods:
     - __str__(): Returns the name of the category.
     """
 
-    def __init__(self, version: str, name: str, conditions: List[LogsourceCondition] = [], fields: dict[str, Field] = {}):
+    def __init__(self, version: str, name: str, conditions: List[LogsourceCondition] = [], fields: Dict[str, Field] = {}):
         """
         Initialize a new Category instance.
 
@@ -31,7 +31,7 @@ class Logsource:
         - name (str): The name of the category.
         - conditions (List[LogsourceCondition], optional): A list of conditions associated with the category.
                                                            Defaults to an empty list.
-        - fields (dict[str, Field], optional): A mapping of field names to their respective Field objects.
+        - fields (Dict[str, Field], optional): A mapping of field names to their respective Field objects.
                                                Defaults to an empty dictionary.
         """
         self.version = version

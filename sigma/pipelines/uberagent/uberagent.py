@@ -1,3 +1,5 @@
+from typing import Dict, List
+
 from sigma.pipelines.common import logsource_windows_process_creation, logsource_windows_image_load, \
     logsource_windows_dns_query, logsource_windows_network_connection, logsource_windows_create_remote_thread, \
     logsource_windows_registry_add, logsource_windows_registry_set, \
@@ -22,7 +24,7 @@ from sigma.pipelines.uberagent.version import UA_VERSION_6_0, UA_VERSION_6_1, UA
 #
 # Documentation:
 # https://uberagent.com/docs/uberagent/latest/esa-features-configuration/threat-detection-engine/event-properties/common-event-properties/
-ua_process_creation_mapping: dict[str, Field] = {
+ua_process_creation_mapping: Dict[str, Field] = {
 
     # Common fields.
     # The fields here are usable in all other event types if supported by Sigma.
@@ -57,7 +59,7 @@ ua_process_creation_mapping: dict[str, Field] = {
 #
 # Documentation:
 # https://uberagent.com/docs/uberagent/latest/esa-features-configuration/threat-detection-engine/event-properties/image-load-event-properties/
-ua_image_load_mapping: dict[str, Field] = {
+ua_image_load_mapping: Dict[str, Field] = {
 
     # Common
     "image"                 : Field(UA_VERSION_6_0, "Process.Path"),
@@ -81,7 +83,7 @@ ua_image_load_mapping: dict[str, Field] = {
 #
 # Documentation:
 # https://uberagent.com/docs/uberagent/latest/esa-features-configuration/threat-detection-engine/event-properties/dns-query-event-properties/
-ua_dns_query_mapping: dict[str, Field] = {
+ua_dns_query_mapping: Dict[str, Field] = {
 
     # Common
     "image"                 : Field(UA_VERSION_6_0, "Process.Path"),
@@ -98,7 +100,7 @@ ua_dns_query_mapping: dict[str, Field] = {
 #
 # Documentation:
 # https://uberagent.com/docs/uberagent/latest/esa-features-configuration/threat-detection-engine/event-properties/network-event-properties/
-ua_network_connection_mapping: dict[str, Field] = {
+ua_network_connection_mapping: Dict[str, Field] = {
 
     # Common
     "image"                 : Field(UA_VERSION_6_0, "Process.Path"),
@@ -123,7 +125,7 @@ ua_network_connection_mapping: dict[str, Field] = {
 #
 # Documentation:
 # https://uberagent.com/docs/uberagent/latest/esa-features-configuration/threat-detection-engine/event-properties/remote-thread-event-properties/
-ua_create_remote_thread_mapping: dict[str, Field] = {
+ua_create_remote_thread_mapping: Dict[str, Field] = {
 
     # Common
     "targetimage"           : Field(UA_VERSION_6_0, "Process.Path"),
@@ -141,7 +143,7 @@ ua_create_remote_thread_mapping: dict[str, Field] = {
 #
 # Documentation:
 # https://uberagent.com/docs/uberagent/latest/esa-features-configuration/threat-detection-engine/event-properties/registry-event-properties/
-ua_registry_event_mapping: dict[str, Field] = {
+ua_registry_event_mapping: Dict[str, Field] = {
 
     # Common
     "image"                 : Field(UA_VERSION_6_0, "Process.Path"),
@@ -168,7 +170,7 @@ ua_registry_event_mapping: dict[str, Field] = {
 #
 # Documentation:
 # https://uberagent.com/docs/uberagent/latest/esa-features-configuration/threat-detection-engine/event-properties/file-system-activity-event-properties/
-ua_file_event_mapping: dict[str, Field] = {
+ua_file_event_mapping: Dict[str, Field] = {
 
     # Common
     "image"                 : Field(UA_VERSION_6_0, "Process.Path"),
@@ -210,7 +212,7 @@ def logsource_windows_process_tampering():
 # A full list of available event types is documented here:
 # https://uberagent.com/docs/uberagent/latest/esa-features-configuration/threat-detection-engine/event-types/
 #
-ua_categories: list[Logsource] = [
+ua_categories: List[Logsource] = [
     #
     # Process & Image Events
     #
@@ -314,7 +316,7 @@ ua_categories: list[Logsource] = [
 ]
 
 
-def ua_create_mapping(uaVersion: Version, category: Logsource) -> list[ProcessingItem]:
+def ua_create_mapping(uaVersion: Version, category: Logsource) -> List[ProcessingItem]:
     """
     Generate a list of processing items based on supported sigma keys for a given uberAgent version and category.
 
@@ -328,14 +330,14 @@ def ua_create_mapping(uaVersion: Version, category: Logsource) -> list[Processin
     - category (Category): The category of events for which the mapping is created.
 
     Returns:
-    - list[ProcessingItem]: A list of processing items tailored to the given uberAgent version and category.
+    - List[ProcessingItem]: A list of processing items tailored to the given uberAgent version and category.
     """
 
     # Retrieve a list of sigma fields supported by the given version.
-    keys: list[str] = uaVersion.reduce_mapping(category.fields)
+    keys: List[str] = uaVersion.reduce_mapping(category.fields)
 
     # Initialize the list of processing items.
-    items: list[ProcessingItem] = [
+    items: List[ProcessingItem] = [
         ProcessingItem(
             identifier=f"ua_{category.name}_unsupported",
             transformation=FieldDetectionItemFailureTransformation("Cannot transform field <{0}>."),
@@ -349,7 +351,7 @@ def ua_create_mapping(uaVersion: Version, category: Logsource) -> list[Processin
     # Each field is handled separately to facilitate individual state transformations.
     for field in keys:
         transformed_field = str(category.fields[field])
-        fm: dict[str] = {field: transformed_field}
+        fm: Dict[str] = {field: transformed_field}
 
         # Field Transformation: Convert the sigma rule field to its corresponding TDE field name.
         items.append(
@@ -402,10 +404,10 @@ def make_pipeline(uaVersion: Version):
     """
 
     # A list to store converted log sources that have been processed.
-    converted_conditions: list[RuleProcessingItemAppliedCondition] = []
+    converted_conditions: List[RuleProcessingItemAppliedCondition] = []
 
     # A list to hold all processing items for the version-specific pipeline.
-    items: list[ProcessingItem] = []
+    items: List[ProcessingItem] = []
 
     # Iterate over the defined categories for uberAgent.
     for category in ua_categories:

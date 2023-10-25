@@ -1,3 +1,5 @@
+from typing import Dict, List
+
 from sigma.pipelines.uberagent.logsource import Logsource
 from sigma.pipelines.uberagent.field import Field
 
@@ -84,17 +86,17 @@ class Version:
 
         return False
 
-    def reduce_mapping(self, mapping: dict[str, Field]):
+    def reduce_mapping(self, mapping: Dict[str, Field]):
         """
         Reduces a mapping to only include fields supported by the current version.
 
         Parameters:
-        - mapping (dict[str, Field]): Mapping of fields.
+        - mapping (Dict[str, Field]): Mapping of fields.
 
         Returns:
-        - list[str]: List of field keys supported by the current version.
+        - List[str]: List of field keys supported by the current version.
         """
-        result: list[str] = []
+        result: List[str] = []
         for k in mapping.keys():
             v: Field = mapping[k]
             if self.is_field_supported(v):

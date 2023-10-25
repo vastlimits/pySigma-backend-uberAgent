@@ -271,7 +271,7 @@ class uberagent(TextQueryBackend):
         ua_rule.set_description(rule.description)
         ua_rule.set_author(rule.author)
         ua_rule.set_annotation(ua_annotation(rule.tags))
-        # ua_rule.set_generic_properties(self.recent_fields)
+        ua_rule.set_generic_properties(state.processing_state["Fields"])
         ua_rule.set_platform(rule.logsource.product)
 
         return str(ua_rule)

@@ -75,9 +75,26 @@ class Rule:
     # ..
     # GenericPropertyN =
     # Available since uberagent 6.1+
-    def set_generic_properties(self, fields):
-        """Set the generic properties. """
-        self.generic_properties = fields
+    def set_generic_properties(self, fields: list[str]) -> None:
+        """
+        Set the generic properties.
+
+        This method filters out specific properties that are always included in
+        all tagging events to avoid redundancy and sorts the fields by name.
+
+        Parameters:
+        - fields (list[str]): List of fields to be considered as generic properties.
+
+        Notes:
+        - Properties such as "Process.Path", "Process.CommandLine", and "Process.Name"
+          are always included in all tagging events. Thus, they are removed from
+          the fields list to avoid redundancy.
+        """
+
+        # The following properties are included in all tagging events anyways.
+        # There is no need to send them twice to the backend so we are ignoring them here.
+        filtered_fields = [prop for prop in fields if prop not in ["Process.Path", "Process.CommandLine", "Process.Name"]]
+        self.generic_properties = filtered_fields
 
     # Not used as configuration setting, but to comment the rule.
     # Available since uberagent 6.0+
@@ -174,11 +191,6 @@ class Rule:
         if self.version.is_version_6_1_or_newer():
             counter = 1
             for prop in self.generic_properties:
-
-                # The following properties are included in all tagging events anyways.
-                # There is no need to send them twice to the backend so we are ignoring them here.
-                if prop in ["Process.Path", "Process.CommandLine", "Process.Name"]:
-                    continue
                 # Generic properties are limited to 10.
                 if counter > 10:
                     break

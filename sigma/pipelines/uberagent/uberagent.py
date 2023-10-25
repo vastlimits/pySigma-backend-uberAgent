@@ -7,13 +7,13 @@ from sigma.pipelines.common import logsource_windows_process_creation, logsource
 from sigma.processing.conditions import LogsourceCondition, RuleProcessingItemAppliedCondition
 from sigma.processing.pipeline import ProcessingPipeline, ProcessingItem
 from sigma.processing.transformations import ChangeLogsourceTransformation, \
-    SetStateTransformation, RuleFailureTransformation
+    RuleFailureTransformation
 
 from sigma.pipelines.uberagent.condition import ExcludeFieldConditionLowercase, IncludeFieldConditionLowercase
 from sigma.pipelines.uberagent.field import Field
 from sigma.pipelines.uberagent.logsource import Logsource
 from sigma.pipelines.uberagent.transformation import FieldMappingTransformationLowercase, \
-    FieldDetectionItemFailureTransformation
+    FieldDetectionItemFailureTransformation, ReferencedFieldTransformation
 from sigma.pipelines.uberagent.version import UA_VERSION_6_0, UA_VERSION_6_1, UA_VERSION_6_2, UA_VERSION_7_0, \
     UA_VERSION_7_1, UA_VERSION_DEVELOP, UA_VERSION_CURRENT_RELEASE, Version
 
@@ -329,10 +329,6 @@ def ua_create_mapping(uaVersion: Version, category: Logsource) -> list[Processin
 
     Returns:
     - list[ProcessingItem]: A list of processing items tailored to the given uberAgent version and category.
-
-    Note:
-    - The function currently has a hardcoded platform value ("Windows") for log source transformation,
-      which may need future modification.
     """
 
     # Retrieve a list of sigma fields supported by the given version.
@@ -366,26 +362,23 @@ def ua_create_mapping(uaVersion: Version, category: Logsource) -> list[Processin
                 ]
             )
         )
-        # State Transformation: Mark the transformed field in the pipeline state. This enables
-        #                       the backend to retrieve the actual used fields and populate generic
-        #                       properties at runtime.
-        items.append(
-            ProcessingItem(
-                identifier=f"ua_{category.name}_state{field}",
-                transformation=SetStateTransformation(field, True),
-                rule_conditions=category.conditions,
-                field_name_conditions=[
-                    IncludeFieldConditionLowercase(fields=[field])
-                ]
-            )
+
+    # State Transformation: Mark the transformed fields in the pipeline state. This enables
+    #                       the backend to retrieve the actual used fields and populate generic
+    #                       properties at runtime.
+    items.append(
+        ProcessingItem(
+            identifier=f"ls_fields_{category.name}_state",
+            transformation=ReferencedFieldTransformation(),
+            rule_conditions=category.conditions
         )
+    )
 
     # Log Source Transformation: Specify the log source category and platform.
-    # NOTE: The "Windows" platform is currently hardcoded and may need modification.
     items.append(
         ProcessingItem(
             identifier=f"ls_{category.name}",
-            transformation=ChangeLogsourceTransformation(category.name, "Windows", None),
+            transformation=ChangeLogsourceTransformation(category.name, None, None),
             rule_conditions=category.conditions
         )
     )

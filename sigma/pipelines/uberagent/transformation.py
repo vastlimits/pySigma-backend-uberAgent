@@ -2,8 +2,8 @@ from dataclasses import dataclass
 from typing import Union, List
 
 from sigma.exceptions import SigmaTransformationError
-from sigma.processing.transformations import FieldMappingTransformation, DetectionItemTransformation
-from sigma.rule import SigmaDetectionItem
+from sigma.processing.transformations import FieldMappingTransformation, DetectionItemTransformation, Transformation
+from sigma.rule import SigmaDetectionItem, SigmaRule
 
 
 @dataclass
@@ -70,3 +70,24 @@ class FieldDetectionItemFailureTransformation(DetectionItemTransformation):
         - SigmaTransformationError: Raised with the formatted message.
         """
         raise SigmaTransformationError(self.message.format(detection_item.field))
+
+
+class ReferencedFieldTransformation(Transformation):
+    def apply(self, pipeline: "sigma.processing.pipeline.Process", rule: SigmaRule) -> None:
+        super().apply(pipeline, rule)
+        fields: list[str] = []
+        for key in pipeline.field_mappings.keys():
+            value = pipeline.field_mappings[key]
+
+            # Check if value is of type set
+            if not isinstance(value, set):
+                raise TypeError(f"Expected a set for key '{key}', but got {type(value).__name__} instead.")
+
+            # Check if set contains exactly one element
+            if len(value) != 1:
+                raise ValueError(
+                    f"Expected a set with exactly one element for key '{key}', but got {len(value)} elements instead.")
+
+            value_str = str(list(value)[0])  # Convert set to list and get the first element
+            fields.append(value_str)
+        pipeline.state["Fields"] = fields

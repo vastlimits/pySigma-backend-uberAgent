@@ -31,7 +31,8 @@ def test_rule_process_creation():
         'EventType = Process.Start\n' \
         'Tag = proc-start-test\n' \
         'RiskScore = 75\n' \
-        'Query = Process.Path == "test" and Process.CommandLine == "test" and Process.Hash.IMP == "test"\n'
+        'Query = Process.Path == "test" and Process.CommandLine == "test" and Process.Hash.IMP == "test"\n' \
+        'GenericProperty1 = Process.Hash.IMP\n'
 
     assert uberagent(processing_pipeline=uberagent_pipeline()).convert(
         SigmaCollection.from_yaml("""

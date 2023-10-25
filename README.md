@@ -1,3 +1,7 @@
+![Tests](https://github.com/vastlimits/pySigma-backend-uberAgent/actions/workflows/test.yml/badge.svg)
+![Coverage Badge](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/svnscha/771a36a467fe196af4b6c9635ff1a12a/raw/e24e099bd98cc162e74f456928bdffadfac3d598/vastlimits-pySigma-backend-uberAgent.json)
+![Status](https://img.shields.io/badge/Status-pre--release-orange)
+
 # pySigma uberAgent Backend
 
 This is the uAQL backend for pySigma. It provides the package `sigma.backends.uberAgent` with the `uberAgentBackend` class.

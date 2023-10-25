@@ -28,16 +28,16 @@ jobs:
         run: poetry install
       - name: Run tests
         run: poetry run pytest --cov=sigma --cov-report term --cov-report xml:cov.xml -vv
-      # - name: Store coverage for badge
-      #   if: ${{ runner.os == 'Linux' }}
-      #   run: poetry run python print-coverage.py >> $GITHUB_ENV
-      # - name: Create coverage badge
-      #   if: ${{ github.repository == 'vastlimits/pySigma-backend-uberAgent' && github.event_name == 'push' && runner.os == 'Linux' }}
-      #   uses: schneegans/dynamic-badges-action@v1.1.0
-      #   with:
-      #     auth: ${{ secrets.GIST_SECRET }}
-      #     gistID: GitHub Gist identifier containing coverage badge JSON expected by shields.io.
-      #     filename: vastlimits-pySigma-backend-uberAgent.json
-      #     label: Coverage
-      #     message: ${{ env.COVERAGE }}
-      #     color: ${{ env.COVERAGE_COLOR }}
+      - name: Store coverage for badge
+        if: ${{ runner.os == 'Linux' }}
+        run: poetry run python print-coverage.py >> $GITHUB_ENV
+      - name: Create coverage badge
+        if: ${{ github.repository == 'vastlimits/pySigma-backend-uberAgent' && github.event_name == 'push' && runner.os == 'Linux' }}
+        uses: schneegans/dynamic-badges-action@v1.1.0
+        with:
+          auth: ${{ secrets.GIST_SECRET }}
+          gistID: 771a36a467fe196af4b6c9635ff1a12a
+          filename: vastlimits-pySigma-backend-uberAgent.json
+          label: Coverage
+          message: ${{ env.COVERAGE }}
+          color: ${{ env.COVERAGE_COLOR }}

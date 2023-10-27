@@ -203,17 +203,13 @@ ua_file_event_mapping: Dict[str, Field] = {
 def logsource_windows_process_tampering():
     return LogsourceCondition(category="process_tampering", product="windows")
 
+
 def logsource_macos_process_creation() -> LogsourceCondition:
     return LogsourceCondition(
         category="process_creation",
         product="macos",
     )
 
-def logsource_macos_network_connection() -> LogsourceCondition:
-    return LogsourceCondition(
-        category="network_connection",
-        product="macos",
-    )
 
 def logsource_macos_file_event():
     return LogsourceCondition(
@@ -242,17 +238,20 @@ def logsource_macos_file_rename():
         product="macos",
     )
 
+
 def logsource_macos_file_change() -> LogsourceCondition:
     return LogsourceCondition(
         category="file_change",
         product="macos",
     )
 
-def logsource_macos_file_access():
+
+def logsource_macos_dns_query() -> LogsourceCondition:
     return LogsourceCondition(
-        category="file_access",
+        category="dns_query",
         product="macos",
     )
+
 
 #
 # Lists all Threat Detection Engine event types of uberAgent and maps them to Sigma log sources.
@@ -266,7 +265,8 @@ ua_categories: List[Logsource] = [
     #
     # Process & Image Events
     #
-    # Not yet used/mappable: Logsource(UA_VERSION_6_0, "Process.Stop"),
+    # Not yet used/mappable: Logsource(UA_VERSION_6_0, "Process.Stop") // Windows,
+    # Not yet used/mappable: Logsource(UA_VERSION_7_1, "Process.Stop") // macOS,
 
     Logsource(UA_VERSION_6_0, "Process.Start",
               conditions=[logsource_windows_process_creation()],
@@ -303,11 +303,7 @@ ua_categories: List[Logsource] = [
 
     # TODO: Update this missing event type in vlDocs
     Logsource(UA_VERSION_6_2, "Net.Any",
-              conditions=[logsource_macos_network_connection()],
-              fields=ua_network_connection_mapping),
-
-    Logsource(UA_VERSION_7_1, "Net.Any",
-              conditions=[logsource_macos_network_connection()],
+              conditions=[logsource_windows_network_connection()],
               fields=ua_network_connection_mapping),
 
     #
@@ -343,6 +339,10 @@ ua_categories: List[Logsource] = [
               conditions=[logsource_windows_dns_query()],
               fields=ua_dns_query_mapping),
 
+    Logsource(UA_VERSION_7_1, "Dns.Query",
+              conditions=[logsource_macos_dns_query()],
+              fields=ua_dns_query_mapping),
+
     #
     # File System Events
     #
@@ -369,7 +369,7 @@ ua_categories: List[Logsource] = [
               fields=ua_file_event_mapping),
 
     Logsource(UA_VERSION_7_1, "File.Read",
-              conditions=[logsource_windows_file_access(), logsource_macos_file_access()],
+              conditions=[logsource_windows_file_access()],
               fields=ua_file_event_mapping)
 ]
 

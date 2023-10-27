@@ -22,10 +22,26 @@ def test_ua_windows():
         """)
     ) == ['Process.Path == "test" and Process.CommandLine == "test"']
 
+def test_ua_macos():
+    assert uberagent(processing_pipeline=uberagent_pipeline()).convert(
+        SigmaCollection.from_yaml("""
+            title: Test
+            status: test
+            logsource:
+                product: macos
+                category: process_creation
+            detection:
+                sel:
+                    Image: test
+                    CommandLine: test
+                condition: sel
+        """)
+    ) == ['Process.Path == "test" and Process.CommandLine == "test"']
+
 
 def test_rule_process_creation():
     expected = \
-        '[ActivityMonitoringRule]\n' \
+        '[ActivityMonitoringRule platform=Windows]\n' \
         'RuleId = 0750fe99-1296-4b84-a60a-6af33e74bb37\n' \
         'RuleName = Test\n' \
         'EventType = Process.Start\n' \
@@ -87,7 +103,7 @@ def test_rule_requires_title():
 
 def test_rule_description():
     expected = \
-        '[ActivityMonitoringRule]\n' \
+        '[ActivityMonitoringRule platform=Windows]\n' \
         '# This is a test rule.\n' \
         'RuleId = 0750fe99-1296-4b84-a60a-6af33e74bb37\n' \
         'RuleName = Test\n' \
@@ -114,7 +130,7 @@ def test_rule_description():
 
 def test_rule_annotation():
     expected = \
-        '[ActivityMonitoringRule]\n' \
+        '[ActivityMonitoringRule platform=Windows]\n' \
         '# This is a test rule.\n' \
         'RuleId = 0750fe99-1296-4b84-a60a-6af33e74bb37\n' \
         'RuleName = Test\n' \

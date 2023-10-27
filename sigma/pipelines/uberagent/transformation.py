@@ -1,9 +1,9 @@
-from dataclasses import dataclass
-from typing import Union, List
+from dataclasses import dataclass, field
+from typing import Optional, Union, List
 
 from sigma.exceptions import SigmaTransformationError
 from sigma.processing.transformations import FieldMappingTransformation, DetectionItemTransformation, Transformation
-from sigma.rule import SigmaDetectionItem, SigmaRule
+from sigma.rule import SigmaDetectionItem, SigmaRule, SigmaLogSource
 
 
 @dataclass
@@ -91,3 +91,16 @@ class ReferencedFieldTransformation(Transformation):
             value_str = str(list(value)[0])  # Convert set to list and get the first element
             fields.append(value_str)
         pipeline.state["Fields"] = fields
+
+@dataclass
+class ChangeLogsourceCategoryTransformation(Transformation):
+    """Replace log source as defined in transformation parameters."""
+
+    category: Optional[str] = field(default=None)
+
+    def apply(
+        self, pipeline: "sigma.processing.pipeline.ProcessingPipeline", rule: SigmaRule
+    ) -> None:
+        super().apply(pipeline, rule)
+        logsource = SigmaLogSource(self.category, rule.logsource.product, rule.logsource.service)
+        rule.logsource = logsource

@@ -14,7 +14,7 @@ from sigma.processing.transformations import ChangeLogsourceTransformation, \
 from sigma.pipelines.uberagent.condition import ExcludeFieldConditionLowercase, IncludeFieldConditionLowercase
 from sigma.pipelines.uberagent.field import Field
 from sigma.pipelines.uberagent.logsource import Logsource
-from sigma.pipelines.uberagent.transformation import FieldMappingTransformationLowercase, \
+from sigma.pipelines.uberagent.transformation import ChangeLogsourceCategoryTransformation, FieldMappingTransformationLowercase, \
     FieldDetectionItemFailureTransformation, ReferencedFieldTransformation
 from sigma.pipelines.uberagent.version import UA_VERSION_6_0, UA_VERSION_6_1, UA_VERSION_6_2, UA_VERSION_7_0, \
     UA_VERSION_7_1, UA_VERSION_DEVELOP, UA_VERSION_CURRENT_RELEASE, Version
@@ -203,6 +203,56 @@ ua_file_event_mapping: Dict[str, Field] = {
 def logsource_windows_process_tampering():
     return LogsourceCondition(category="process_tampering", product="windows")
 
+def logsource_macos_process_creation() -> LogsourceCondition:
+    return LogsourceCondition(
+        category="process_creation",
+        product="macos",
+    )
+
+def logsource_macos_network_connection() -> LogsourceCondition:
+    return LogsourceCondition(
+        category="network_connection",
+        product="macos",
+    )
+
+def logsource_macos_file_event():
+    return LogsourceCondition(
+        category="file_event",
+        product="macos",
+    )
+
+
+def logsource_macos_file_delete():
+    return LogsourceCondition(
+        category="file_delete",
+        product="macos",
+    )
+
+
+def logsource_macos_file_access():
+    return LogsourceCondition(
+        category="file_access",
+        product="macos",
+    )
+
+
+def logsource_macos_file_rename():
+    return LogsourceCondition(
+        category="file_rename",
+        product="macos",
+    )
+
+def logsource_macos_file_change() -> LogsourceCondition:
+    return LogsourceCondition(
+        category="file_change",
+        product="macos",
+    )
+
+def logsource_macos_file_access():
+    return LogsourceCondition(
+        category="file_access",
+        product="macos",
+    )
 
 #
 # Lists all Threat Detection Engine event types of uberAgent and maps them to Sigma log sources.
@@ -220,6 +270,10 @@ ua_categories: List[Logsource] = [
 
     Logsource(UA_VERSION_6_0, "Process.Start",
               conditions=[logsource_windows_process_creation()],
+              fields=ua_process_creation_mapping),
+
+    Logsource(UA_VERSION_7_1, "Process.Start",
+              conditions=[logsource_macos_process_creation()],
               fields=ua_process_creation_mapping),
 
     Logsource(UA_VERSION_6_2, "Process.CreateRemoteThread",
@@ -249,7 +303,11 @@ ua_categories: List[Logsource] = [
 
     # TODO: Update this missing event type in vlDocs
     Logsource(UA_VERSION_6_2, "Net.Any",
-              conditions=[logsource_windows_network_connection()],
+              conditions=[logsource_macos_network_connection()],
+              fields=ua_network_connection_mapping),
+
+    Logsource(UA_VERSION_7_1, "Net.Any",
+              conditions=[logsource_macos_network_connection()],
               fields=ua_network_connection_mapping),
 
     #
@@ -295,23 +353,23 @@ ua_categories: List[Logsource] = [
     # Not yet used/mappable: Logsource(UA_VERSION_7_1, "File.RawAccessRead"),
 
     Logsource(UA_VERSION_7_1, "File.Create",
-              conditions=[logsource_windows_file_event()],
+              conditions=[logsource_windows_file_event(), logsource_macos_file_event()],
               fields=ua_file_event_mapping),
 
     Logsource(UA_VERSION_7_1, "File.Delete",
-              conditions=[logsource_windows_file_delete()],
+              conditions=[logsource_windows_file_delete(), logsource_macos_file_delete()],
               fields=ua_file_event_mapping),
 
     Logsource(UA_VERSION_7_1, "File.Rename",
-              conditions=[logsource_windows_file_rename()],
+              conditions=[logsource_windows_file_rename(), logsource_macos_file_rename()],
               fields=ua_file_event_mapping),
 
     Logsource(UA_VERSION_7_1, "File.Write",
-              conditions=[logsource_windows_file_change()],
+              conditions=[logsource_windows_file_change(), logsource_macos_file_change()],
               fields=ua_file_event_mapping),
 
     Logsource(UA_VERSION_7_1, "File.Read",
-              conditions=[logsource_windows_file_access()],
+              conditions=[logsource_windows_file_access(), logsource_macos_file_access()],
               fields=ua_file_event_mapping)
 ]
 
@@ -380,7 +438,7 @@ def ua_create_mapping(uaVersion: Version, category: Logsource) -> List[Processin
     items.append(
         ProcessingItem(
             identifier=f"ls_{category.name}",
-            transformation=ChangeLogsourceTransformation(category.name, None, None),
+            transformation=ChangeLogsourceCategoryTransformation(category.name),
             rule_conditions=category.conditions
         )
     )

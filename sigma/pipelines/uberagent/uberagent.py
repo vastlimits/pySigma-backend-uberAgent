@@ -14,7 +14,7 @@ from sigma.processing.transformations import ChangeLogsourceTransformation, \
 from sigma.pipelines.uberagent.condition import ExcludeFieldConditionLowercase, IncludeFieldConditionLowercase
 from sigma.pipelines.uberagent.field import Field
 from sigma.pipelines.uberagent.logsource import Logsource
-from sigma.pipelines.uberagent.transformation import ChangeLogsourceCategoryTransformation, FieldMappingTransformationLowercase, \
+from sigma.pipelines.uberagent.transformation import ChangeLogsourceCategoryTransformation, ChangeLogsourceCategoryTransformationWindows, FieldMappingTransformationLowercase, \
     FieldDetectionItemFailureTransformation, ReferencedFieldTransformation
 from sigma.pipelines.uberagent.version import UA_VERSION_6_0, UA_VERSION_6_1, UA_VERSION_6_2, UA_VERSION_7_0, \
     UA_VERSION_7_1, UA_VERSION_DEVELOP, UA_VERSION_CURRENT_RELEASE, Version
@@ -108,13 +108,14 @@ ua_network_connection_mapping: Dict[str, Field] = {
     "commandline"           : Field(UA_VERSION_6_0, "Process.CommandLine"),
 
     # Network Event
+    "dst_ip"                : Field(UA_VERSION_6_0, "Net.Target.Ip"),
     "destinationip"         : Field(UA_VERSION_6_0, "Net.Target.Ip"),
     "destinationhostname"   : Field(UA_VERSION_6_0, "Net.Target.Name"),
     "destinationport"       : Field(UA_VERSION_6_0, "Net.Target.Port"),
     # ""                    : Field(UA_VERSION_6_2, "Net.Target.PortName")
     # ""                    : Field(UA_VERSION_6_0, "Net.Target.Protocol")
     "destinationisipv6"     : Field(UA_VERSION_6_2, "Net.Target.IpIsV6"),
-    # ""                    : Field(UA_VERSION_6_2, "Net.Source.Ip")
+    "src_ip"                : Field(UA_VERSION_6_2, "Net.Source.Ip"),
     # ""                    : Field(UA_VERSION_6_2, "Net.Source.Name")
     "sourceport"            : Field(UA_VERSION_6_2, "Net.Source.Port")
     # ""                    : Field(UA_VERSION_6_2, "Net.Source.PortName")
@@ -252,6 +253,11 @@ def logsource_macos_dns_query() -> LogsourceCondition:
         product="macos",
     )
 
+def logsource_common_firewall() -> LogsourceCondition:
+    return LogsourceCondition(
+        category="firewall"
+    )
+
 
 #
 # Lists all Threat Detection Engine event types of uberAgent and maps them to Sigma log sources.
@@ -303,7 +309,10 @@ ua_categories: List[Logsource] = [
 
     # TODO: Update this missing event type in vlDocs
     Logsource(UA_VERSION_6_2, "Net.Any",
-              conditions=[logsource_windows_network_connection()],
+              conditions=[
+                  logsource_windows_network_connection(),
+                  logsource_common_firewall()
+              ],
               fields=ua_network_connection_mapping),
 
     #
@@ -417,6 +426,7 @@ def ua_create_mapping(uaVersion: Version, category: Logsource) -> List[Processin
                 identifier=f"ua_{category.name}_field_{field}",
                 transformation=FieldMappingTransformationLowercase(fm),
                 rule_conditions=category.conditions,
+                rule_condition_linking=any,
                 field_name_conditions=[
                     IncludeFieldConditionLowercase(fields=[field])
                 ]
@@ -430,7 +440,8 @@ def ua_create_mapping(uaVersion: Version, category: Logsource) -> List[Processin
         ProcessingItem(
             identifier=f"ls_fields_{category.name}_state",
             transformation=ReferencedFieldTransformation(),
-            rule_conditions=category.conditions
+            rule_conditions=category.conditions,
+            rule_condition_linking=any
         )
     )
 
@@ -439,7 +450,8 @@ def ua_create_mapping(uaVersion: Version, category: Logsource) -> List[Processin
         ProcessingItem(
             identifier=f"ls_{category.name}",
             transformation=ChangeLogsourceCategoryTransformation(category.name),
-            rule_conditions=category.conditions
+            rule_conditions=category.conditions,
+            rule_condition_linking=any
         )
     )
 
@@ -481,6 +493,18 @@ def make_pipeline(uaVersion: Version):
 
         # Add the name of the converted log source to the list of processed conditions.
         converted_conditions.append(RuleProcessingItemAppliedCondition(f"ls_{category.name}"))
+
+    # Edge Case: Firewall rules do not have a product specifier.
+    #            uberAgent can transform these rules using the Net.Any event type. However, that
+    #            event type is not yet supported on uberAgent for macOS.
+    #            Therefore, we need to handle that edge case and change the log source product to "Windows", explicitly.
+    items.append(ProcessingItem(
+        identifier=f"ls_edge_case_firewall",
+        rule_condition_linking=any,
+        transformation=ChangeLogsourceCategoryTransformationWindows(),
+        rule_conditions=[LogsourceCondition(category="Net.Any")]
+    ))
+    converted_conditions.append(RuleProcessingItemAppliedCondition(f"ls_edge_case_firewall"))
 
     # Add a transformation item to filter out any unsupported log sources.
     items.append(ProcessingItem(

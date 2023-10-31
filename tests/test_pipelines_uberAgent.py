@@ -158,3 +158,32 @@ def test_rule_annotation():
                     CommandLine: test
                 condition: sel
         """), "conf") == [expected]
+
+# Test "common" rule without specific product.
+def test_rule_network_any_common():
+    expected = \
+        '[ActivityMonitoringRule platform=Windows]\n' \
+        'RuleId = 0750fe99-1296-4b84-a60a-6af33e74bb37\n' \
+        'RuleName = Test\n' \
+        'EventType = Net.Any\n' \
+        'Tag = test\n' \
+        'RiskScore = 75\n' \
+        'Query = Net.Target.Ip in ["1.1.1.1", "2.2.2.2"]\n' \
+        'GenericProperty1 = Net.Target.Ip\n'
+
+    assert uberagent(processing_pipeline=uberagent_pipeline()).convert(
+        SigmaCollection.from_yaml("""
+            title: Test
+            id: 0750fe99-1296-4b84-a60a-6af33e74bb37
+            status: test
+            level: high
+            logsource:
+                category: firewall
+            detection:
+                select_outgoing:
+                    dst_ip:
+                        - '1.1.1.1'
+                        - '2.2.2.2'
+                condition: 1 of select*
+        """), "conf"
+    ) == [expected]

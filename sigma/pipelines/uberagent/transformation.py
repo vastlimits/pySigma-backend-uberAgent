@@ -98,9 +98,22 @@ class ChangeLogsourceCategoryTransformation(Transformation):
 
     category: Optional[str] = field(default=None)
 
+
     def apply(
         self, pipeline: "sigma.processing.pipeline.ProcessingPipeline", rule: SigmaRule
     ) -> None:
         super().apply(pipeline, rule)
         logsource = SigmaLogSource(self.category, rule.logsource.product, rule.logsource.service)
+        rule.logsource = logsource
+
+
+@dataclass
+class ChangeLogsourceCategoryTransformationWindows(Transformation):
+    """Replace log source as defined in transformation parameters."""
+
+    def apply(
+        self, pipeline: "sigma.processing.pipeline.ProcessingPipeline", rule: SigmaRule
+    ) -> None:
+        super().apply(pipeline, rule)
+        logsource = SigmaLogSource(rule.logsource.category, "windows", rule.logsource.service)
         rule.logsource = logsource

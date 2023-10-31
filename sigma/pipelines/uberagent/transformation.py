@@ -73,7 +73,31 @@ class FieldDetectionItemFailureTransformation(DetectionItemTransformation):
 
 
 class ReferencedFieldTransformation(Transformation):
+    """
+    This class extends the `Transformation` class and overrides the `apply` method to transform
+    the `field_mappings` of a given `pipeline` and store the transformed fields in the pipeline's state.
+    """
     def apply(self, pipeline: "sigma.processing.pipeline.Process", rule: SigmaRule) -> None:
+        """
+        Applies the transformation on the `field_mappings` of the given `pipeline`.
+
+        The method performs the following transformations:
+        - Checks if each value in `field_mappings` is of type set. Raises a `TypeError` otherwise.
+        - Checks if each set contains exactly one element. Raises a `ValueError` otherwise.
+        - Converts the single element in the set to a string and appends it to a list.
+        - Stores the list of transformed fields in the `state` of the `pipeline` under the key "Fields".
+
+        Parameters:
+        - pipeline (sigma.processing.pipeline.Process): The pipeline on which the transformation is to be applied.
+        - rule (SigmaRule): The Sigma rule that is being processed (not used in this transformation).
+
+        Raises:
+        - TypeError: If a value in `field_mappings` is not of type set.
+        - ValueError: If a set in `field_mappings` does not contain exactly one element.
+
+        Returns:
+        - None
+        """
         super().apply(pipeline, rule)
         fields: List[str] = []
         for key in pipeline.field_mappings.keys():
@@ -94,11 +118,35 @@ class ReferencedFieldTransformation(Transformation):
 
 @dataclass
 class ChangeLogsourceCategoryTransformation(Transformation):
-    """Replace log source as defined in transformation parameters."""
+    """
+    A class used to replace the log source category in a Sigma rule.
 
+    This class extends the `Transformation` class and overrides the `apply` method
+    to replace the `logsource` category of a given `SigmaRule` with a new category
+    defined in the transformation parameters.
+
+    Attributes:
+    - category (Optional[str]): The new log source category to be set. Default is None.
+    """
     category: Optional[str] = field(default=None)
 
 
+    """
+    Applies the transformation on the `logsource` of the given `rule`.
+
+    The method performs the following transformations:
+    - Replaces the `logsource` category of the `rule` with the `category` specified
+        in the transformation parameters, while keeping the `product` and `service`
+        unchanged.
+
+    Parameters:
+    - pipeline (sigma.processing.pipeline.ProcessingPipeline): The pipeline on which the
+        transformation is to be applied.
+    - rule (SigmaRule): The Sigma rule whose `logsource` category is to be replaced.
+
+    Returns:
+    - None
+    """
     def apply(
         self, pipeline: "sigma.processing.pipeline.ProcessingPipeline", rule: SigmaRule
     ) -> None:
@@ -107,13 +155,37 @@ class ChangeLogsourceCategoryTransformation(Transformation):
         rule.logsource = logsource
 
 
+# Convenience to explicitly force Windows logsource product.
 @dataclass
 class ChangeLogsourceCategoryTransformationWindows(Transformation):
-    """Replace log source as defined in transformation parameters."""
+    """
+    A class used to explicitly set the log source product to 'windows' in a Sigma rule.
 
+    This class extends the `Transformation` class and overrides the `apply` method
+    to replace the `logsource` product of a given `SigmaRule` with 'windows', while
+    keeping the `category` and `service` unchanged.
+
+    Usage:
+    Convenience to explicitly force the log source product to 'windows'.
+    """
     def apply(
         self, pipeline: "sigma.processing.pipeline.ProcessingPipeline", rule: SigmaRule
     ) -> None:
+        """
+        Applies the transformation on the `logsource` of the given `rule`.
+
+        The method performs the following transformation:
+        - Replaces the `logsource` product of the `rule` with 'windows', while keeping
+          the `category` and `service` unchanged.
+
+        Parameters:
+        - pipeline (sigma.processing.pipeline.ProcessingPipeline): The pipeline on which the
+          transformation is to be applied.
+        - rule (SigmaRule): The Sigma rule whose `logsource` product is to be replaced with 'windows'.
+
+        Returns:
+        - None
+        """
         super().apply(pipeline, rule)
         logsource = SigmaLogSource(rule.logsource.category, "windows", rule.logsource.service)
         rule.logsource = logsource

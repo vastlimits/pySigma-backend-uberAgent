@@ -8,8 +8,7 @@ from sigma.pipelines.common import logsource_windows_process_creation, logsource
     logsource_windows_file_event, logsource_windows_file_access
 from sigma.processing.conditions import LogsourceCondition, RuleProcessingItemAppliedCondition
 from sigma.processing.pipeline import ProcessingPipeline, ProcessingItem
-from sigma.processing.transformations import ChangeLogsourceTransformation, \
-    RuleFailureTransformation
+from sigma.processing.transformations import RuleFailureTransformation, SetStateTransformation
 
 from sigma.pipelines.uberagent.condition import ExcludeFieldConditionLowercase, IncludeFieldConditionLowercase
 from sigma.pipelines.uberagent.field import Field
@@ -505,6 +504,16 @@ def make_pipeline(uaVersion: Version):
         rule_conditions=[LogsourceCondition(category="Net.Any")]
     ))
     converted_conditions.append(RuleProcessingItemAppliedCondition(f"ls_edge_case_firewall"))
+
+    # Add transformation to have the version used available in backend.
+    items.append(
+        ProcessingItem(
+            identifier=f"ua_version_state",
+            transformation=SetStateTransformation("uaVersion", uaVersion._outputVersion),
+            rule_conditions=[],
+            rule_condition_linking=any
+        )
+    )
 
     # Add a transformation item to filter out any unsupported log sources.
     items.append(ProcessingItem(

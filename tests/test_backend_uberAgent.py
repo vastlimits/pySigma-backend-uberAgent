@@ -1,7 +1,6 @@
 import pytest
 from sigma.collection import SigmaCollection
 from sigma.backends.uberagent import uberagent
-from sigma.backends.uberagent.exceptions import MissingPropertyException
 
 
 @pytest.fixture
@@ -9,7 +8,6 @@ def uberAgent_backend():
     return uberagent()
 
 
-# TODO: implement tests for some basic queries and their expected results.
 def test_uberAgent_and_expression(uberAgent_backend: uberagent):
     assert uberAgent_backend.convert(
         SigmaCollection.from_yaml("""

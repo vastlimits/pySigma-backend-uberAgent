@@ -86,8 +86,6 @@ class uberagent(TextQueryBackend):
     not_token: ClassVar[str] = "not"
 
     # Token inserted between field and value (without separator)
-    # TODO (SC): Is this correct with having spaces? The comment indicates 'without separator' or is the whitespace
-    #            expected to be declared differently.
     eq_token: ClassVar[str] = " == "
 
     # String output Fields Quoting Character used to quote field characters if field_quote_pattern matches (or not,
@@ -232,25 +230,19 @@ class uberagent(TextQueryBackend):
 
     # Value not bound to a field
     # Expression for string value not bound to a field as format string with placeholder {value}
-    # TODO: Review this.
     unbound_value_str_expression: ClassVar[str] = '"{value}"'
 
     # Expression for number value not bound to a field as format string with placeholder {value}
-    # TODO: Review this.
     unbound_value_num_expression: ClassVar[str] = '{value}'
 
     # Expression for regular expression not bound to a field as format string with placeholder {value} and {flag_x}
     # as described for re_expression
-    # TODO: Review this.
     unbound_value_re_expression: ClassVar[str] = '_=~{value}'
 
     # Query finalization: appending and concatenating deferred query part
     deferred_start: ClassVar[str] = "\n| "  # String used as separator between main query and deferred parts
     deferred_separator: ClassVar[str] = "\n| "  # String used to join multiple deferred query parts
     deferred_only_query: ClassVar[str] = "*"  # String used as query if final query only contains deferred expression
-
-    # TODO: implement custom methods for query elements not covered by the default backend base.
-    # Documentation: https://sigmahq-pysigma.readthedocs.io/en/latest/Backends.html
 
     def finalize_query_conf(self, rule: SigmaRule, query: str, index: int, state: ConversionState) -> str:
 
@@ -260,8 +252,11 @@ class uberagent(TextQueryBackend):
         if rule.title is None or len(rule.title) == 0:
             raise MissingPropertyException("title")
 
-        # TODO: Use version from settings/configuration/pipeline?
-        ua_rule: Rule = Rule(Version("develop"))
+        version = Version("develop")
+        if "uaVersion" in state.processing_state:
+            version = Version(state.processing_state["uaVersion"])
+
+        ua_rule: Rule = Rule(version)
         ua_rule.set_query(self.finalize_query_default(rule, query, index, state))
         ua_rule.set_id(rule.id)
         ua_rule.set_name(rule.title)

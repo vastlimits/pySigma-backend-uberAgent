@@ -75,6 +75,31 @@ sigma convert -s -f conf -p uberagent-7.0.0 -t uberagent "..\sigma\rules\windows
 
 This command will generate configurations compatible with uberAgent version 7.0.0, rather than the most recent release.
 
+## Streamlined Usage Guide
+Once the environment for sigma-cli and pySigma-uberAgent-backend is set up, you can leverage utility scripts to streamline the rule generation process.
+
+### Default Rule Generation
+Execute the following commands to copy and convert the Sigma rules for the current released uberAgent version:
+
+```
+cd pySigma-backend-uberAgent
+mkdir build
+cd build
+../copy-rules.py "/path/to/sigma/rules"
+../convert-rules.sh $(pwd)
+```
+
+### Specifying uberAgent Version
+To generate rules for a specific version of uberAgent, like uberAgent 6.0.0, follow these steps:
+
+```
+cd pySigma-backend-uberAgent
+mkdir build
+cd build
+../copy-rules.py "/path/to/sigma/rules"
+../convert-rules.sh $(pwd) uberagent-6.0.0
+```
+
 
 # Development Guidelines
 

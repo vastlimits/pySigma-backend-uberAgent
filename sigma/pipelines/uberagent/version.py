@@ -165,6 +165,8 @@ class Version:
         if self.is_version_develop() and logsource.version == UA_VERSION_DEVELOP:
             return True
 
+        return False
+
     def _version(self):
         """
         Convert the version string into a tuple of integers for easier comparison.

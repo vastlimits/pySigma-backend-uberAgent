@@ -1,5 +1,4 @@
-from .uberagent import uberagent, uberagent600, uberagent610, uberagent620, uberagent700, uberagent710, \
-    uberagent_develop
+from .uberagent import uberagent, uberagent600, uberagent610, uberagent620, uberagent700, uberagent710, uberagent_develop, uberagent_test
 
 pipelines = {
     "uberagent": uberagent,
@@ -8,5 +7,5 @@ pipelines = {
     "uberagent-6.2.0": uberagent620,
     "uberagent-7.0.0": uberagent700,
     "uberagent-7.1.0": uberagent710,
-    "uberagent-develop": uberagent_develop,
+    "uberagent-develop": uberagent_develop
 }

@@ -225,13 +225,6 @@ def logsource_macos_file_delete():
     )
 
 
-def logsource_macos_file_access():
-    return LogsourceCondition(
-        category="file_access",
-        product="macos",
-    )
-
-
 def logsource_macos_file_rename():
     return LogsourceCondition(
         category="file_rename",
@@ -601,3 +594,13 @@ def uberagent_develop() -> ProcessingPipeline:
     - ProcessingPipeline: The assembled processing pipeline for the development version.
     """
     return make_pipeline(Version(UA_VERSION_DEVELOP))
+
+
+def uberagent_test(version: str) -> ProcessingPipeline:
+    """
+    Create a processing pipeline for the given version of uberAgent.
+
+    Returns:
+    - ProcessingPipeline: The assembled processing pipeline for the development version.
+    """
+    return make_pipeline(Version(version))

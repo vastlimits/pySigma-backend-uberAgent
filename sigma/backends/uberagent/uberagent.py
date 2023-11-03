@@ -53,10 +53,7 @@ def ua_risk_score(level: SigmaLevel) -> int:
     }
 
     level = str(level).lower()
-    if level in levels:
-        return levels[level]
-
-    return 0
+    return levels[level]
 
 
 class uberagent(TextQueryBackend):

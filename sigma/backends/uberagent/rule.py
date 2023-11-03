@@ -155,19 +155,21 @@ class Rule:
             result += "# Author: {}\n".format(self.author)
 
         # Make sure all required properties have at least a value that is somehow usable.
-        if self.event_type is None:
+        if self.event_type is None or len(self.event_type) == 0:
             raise MalformedRuleException()
 
-        if len(self.tag) == 0:
+        if self.tag is None or len(self.tag) == 0:
             raise MalformedRuleException()
 
-        if len(self.name) == 0:
+        if self.name is None or len(self.name) == 0:
             raise MalformedRuleException()
 
-        if len(self.query) == 0:
+        if self.query is None or len(self.query) == 0:
             raise MalformedRuleException()
 
         if self.version.is_version_7_0_or_newer():
+            if self.id is None or len(str(self.id)) == 0:
+                raise MalformedRuleException()
             result += "RuleId = {}\n".format(self.id)
 
         result += "RuleName = {}\n".format(self.name)

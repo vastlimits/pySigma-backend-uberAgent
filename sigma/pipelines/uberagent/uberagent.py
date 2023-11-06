@@ -584,7 +584,7 @@ def uberagent_develop() -> ProcessingPipeline:
     return make_pipeline(Version(UA_VERSION_DEVELOP))
 
 
-def uberagent_test(version: str) -> ProcessingPipeline:
+def uberagent_test(version: str = UA_VERSION_DEVELOP) -> ProcessingPipeline:
     """
     Create a processing pipeline for the given version of uberAgent.
 

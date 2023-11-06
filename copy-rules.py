@@ -74,8 +74,7 @@ def select_rules(rules_path) -> dict:
             key = "sigma-{}-{}".format(rule["level"], platform)
             if key not in result:
                 result[key] = []
-            else:
-                result[key].append(file)
+            result[key].append(file)
 
     return result
 

@@ -486,18 +486,6 @@ def make_pipeline(uaVersion: Version):
         # Add the name of the converted log source to the list of processed conditions.
         converted_conditions.append(RuleProcessingItemAppliedCondition(f"ls_{category.name}"))
 
-    # Edge Case: Firewall rules do not have a product specifier.
-    #            uberAgent can transform these rules using the Net.Any event type. However, that
-    #            event type is not yet supported on uberAgent for macOS.
-    #            Therefore, we need to handle that edge case and change the log source product to "Windows", explicitly.
-    items.append(ProcessingItem(
-        identifier=f"ls_edge_case_firewall",
-        rule_condition_linking=any,
-        transformation=ChangeLogsourceCategoryTransformationWindows(),
-        rule_conditions=[LogsourceCondition(category="Net.Any")]
-    ))
-    converted_conditions.append(RuleProcessingItemAppliedCondition(f"ls_edge_case_firewall"))
-
     # Add transformation to have the version used available in backend.
     items.append(
         ProcessingItem(

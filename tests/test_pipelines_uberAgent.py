@@ -163,7 +163,7 @@ def test_rule_annotation():
 # Test "common" rule without specific product.
 def test_rule_network_any_common():
     expected = \
-        '[ActivityMonitoringRule platform=Windows]\n' \
+        '[ActivityMonitoringRule]\n' \
         'RuleId = 01234567-1234-5678-1234-567890123456\n' \
         'RuleName = Test\n' \
         'EventType = Net.Any\n' \

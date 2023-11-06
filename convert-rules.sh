@@ -66,7 +66,7 @@ PIPELINE="${2:-uberagent}"
 
 # Initialize an empty array to store summary messages
 declare -a summaryMessages=()
-declare -a summaryDeletionMessages=()
+declare -a summaryEmptyMessages=()
 
 # Loop over the platforms, configs, and run the sigma converter command
 for PLATFORM in "${platforms[@]}"; do
@@ -100,11 +100,8 @@ for PLATFORM in "${platforms[@]}"; do
 
         # Check if the file contains 0 rules
         if [ $RULE_COUNT -eq 0 ]; then
-            # If 0 rules, delete the file
-            rm "$OUTPUT_FILE"
-            summaryDeletionMessages+=("File $OUTPUT_FILE contained 0 rules and was deleted.")
+            summaryEmptyMessages+=("File $OUTPUT_FILE contains 0 rules.")
         else
-            # If more than 0 rules, store the summary message
             summaryMessages+=("File $OUTPUT_FILE contains $RULE_COUNT rules.")
         fi
     done
@@ -116,7 +113,7 @@ for message in "${summaryMessages[@]}"; do
     echo "$message"
 done
 
-echo -e "\nSummary (deleted):"
-for message in "${summaryDeletionMessages[@]}"; do
+echo -e "\nSummary (empty):"
+for message in "${summaryEmptyMessages[@]}"; do
     echo "$message"
 done

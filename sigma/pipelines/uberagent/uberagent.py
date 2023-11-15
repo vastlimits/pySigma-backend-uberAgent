@@ -162,7 +162,7 @@ ua_registry_event_mapping: Dict[str, Field] = {
     # ""                    : Field(UA_VERSION_6_0, "Reg.Key.Sddl"),
     # ""                    : Field(UA_VERSION_6_0, "Reg.Key.Hive"),
     "targetobject"          : Field(UA_VERSION_6_2, "Reg.Key.Target"),
-    "details"               : Field(UA_VERSION_7_1, "Reg.Value.Data")
+    # "details"             : Field(              , "Reg.Value.Data")
     # ""                    : Field(UA_VERSION_7_1, "Reg.Value.Type")
 }
 

@@ -96,22 +96,26 @@ def write_directory(outdir: str, selected_rules: list):
         shutil.copy(rule_path, dest_path)
 
 
+def prepare_directory(outdir: str):
+    # Check if the directory already exists
+    if os.path.exists(outdir):
+        raise FileExistsError(f"Directory '{outdir}' already exists.")
+
+    # Create the directory
+    os.makedirs(outdir)
+
+
 def main(args) -> int:
 
     print("[I] Preparing output...")
-    for level in LEVEL:
-        for platform in PLATFORM:
-            if not args.skip_platform:
+    if not args.skip_platform:
+        for level in LEVEL:
+            prepare_directory(outdir)
+    else:
+        for level in LEVEL:
+            for platform in PLATFORM:
                 outdir = f"sigma-{level}-{platform}"
-            else:
-                outdir = f"sigma-{level}"
-
-            # Check if the directory already exists
-            if os.path.exists(outdir):
-                raise FileExistsError(f"Directory '{outdir}' already exists.")
-
-            # Create the directory
-            os.makedirs(outdir)
+                prepare_directory(outdir)
 
 
     print("[I] Parsing and selecting rules, this will take some time...")

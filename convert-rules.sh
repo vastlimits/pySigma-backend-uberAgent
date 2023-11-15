@@ -81,8 +81,6 @@ for dir in ${BASE_DIR}/*; do
 # The command used to generate the ruleset is:
 #    sigma convert -s -f conf -p $PIPELINE -t $TARGET $dir >> $OUTPUT_FILE
 #
-# The rules in this file are marked with sigma-level: $(basename "${REL_PATH%-}")
-#
 "
 
         # Write the header to the output file

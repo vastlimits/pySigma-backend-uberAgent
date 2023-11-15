@@ -1,14 +1,15 @@
 import json
 import re
-from typing import ClassVar, Dict, Tuple, Pattern, List, Any, Optional
+from typing import ClassVar, Dict, Tuple, Pattern, List, Any, Optional, Union
 
-from sigma.conditions import ConditionItem, ConditionAND, ConditionOR, ConditionNOT
+from sigma.conditions import ConditionItem, ConditionAND, ConditionOR, ConditionNOT, ConditionFieldEqualsValueExpression
 from sigma.conversion.base import TextQueryBackend
 from sigma.conversion.state import ConversionState
 from sigma.rule import SigmaRule, SigmaLevel
 from sigma.types import SigmaCompareExpression, SigmaRegularExpressionFlag
+from sigma.conversion.deferred import DeferredQueryExpression
 
-from sigma.backends.uberagent.exceptions import MissingPropertyException
+from sigma.backends.uberagent.exceptions import MissingPropertyException, MissingFunctionException
 from sigma.backends.uberagent.rule import Rule
 from sigma.pipelines.uberagent.version import Version
 
@@ -196,13 +197,13 @@ class uberagent(TextQueryBackend):
 
     # Field existence condition expressions.
     # Expression for field existence as format string with {field} placeholder for field name
-    # TODO: Review this
-    field_exists_expression: ClassVar[str] = "exists({field})"
+    # TODO: "exists({field})"
+    field_exists_expression: ClassVar[str] = None
 
     # Expression for field non-existence as format string with {field} placeholder for field name. If not set,
     # field_exists_expression is negated with boolean NOT.
-    # TODO: Review this
-    field_not_exists_expression: ClassVar[str] = "notexists({field})"
+    # TODO: "notexists({field})"
+    field_not_exists_expression: ClassVar[str] = None
 
     # Field value in list, e.g. "field in (value list)" or "field containsall (value list)"
     convert_or_as_in: ClassVar[bool] = True  # Convert OR as in-expression
@@ -219,8 +220,8 @@ class uberagent(TextQueryBackend):
     or_in_operator: ClassVar[str] = "in"
 
     # Operator used to convert AND into in-expressions. Must be set if convert_and_as_in is set
-    # TODO: Review this.
-    and_in_operator: ClassVar[str] = "contains-all"
+    # TODO: "contains-all"
+    and_in_operator: ClassVar[str] = None
 
     # List element separator
     list_separator: ClassVar[str] = ", "
@@ -241,6 +242,24 @@ class uberagent(TextQueryBackend):
     deferred_separator: ClassVar[str] = "\n| "  # String used to join multiple deferred query parts
     deferred_only_query: ClassVar[str] = "*"  # String used as query if final query only contains deferred expression
 
+    def get_version_from_state(self, state: ConversionState) -> Version:
+        version = Version("develop")
+        if "uaVersion" in state.processing_state:
+            version = Version(state.processing_state["uaVersion"])
+        return version
+
+
+    # Make sure that the function 'isnull' is only used for uberAgent 7.0+ versions.
+    # Previous versions do not support that expression.
+    def convert_condition_field_eq_val_null(
+        self, cond: ConditionFieldEqualsValueExpression, state: ConversionState
+    ) -> Union[str, DeferredQueryExpression]:
+        version = self.get_version_from_state(state)
+        if version.is_version_7_0_or_newer():
+            return super().convert_condition_field_eq_val_null(cond, state)
+        raise MissingFunctionException("isnull")
+
+
     def finalize_query_conf(self, rule: SigmaRule, query: str, index: int, state: ConversionState) -> str:
 
         if rule.id is None or len(str(rule.id)) == 0:
@@ -249,11 +268,8 @@ class uberagent(TextQueryBackend):
         if rule.title is None or len(rule.title) == 0:
             raise MissingPropertyException("title")
 
-        version = Version("develop")
-        if "uaVersion" in state.processing_state:
-            version = Version(state.processing_state["uaVersion"])
 
-        ua_rule: Rule = Rule(version)
+        ua_rule: Rule = Rule(self.get_version_from_state(state))
         ua_rule.set_query(self.finalize_query_default(rule, query, index, state))
         ua_rule.set_id(rule.id)
         ua_rule.set_name(rule.title)

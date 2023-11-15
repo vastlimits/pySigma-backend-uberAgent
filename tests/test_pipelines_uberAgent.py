@@ -3,7 +3,7 @@ from sigma.collection import SigmaCollection
 from sigma.exceptions import SigmaLevelError
 
 from sigma.backends.uberagent import uberagent
-from sigma.backends.uberagent.exceptions import MissingPropertyException
+from sigma.backends.uberagent.exceptions import MissingPropertyException, MissingFunctionException
 from sigma.pipelines.uberagent import uberagent as uberagent_pipeline, uberagent600, uberagent610, uberagent620, uberagent700, uberagent710, uberagent_develop, uberagent_test
 
 
@@ -330,3 +330,19 @@ def test_uberagent_develop():
                 condition: sel
         """)
     ) == ['Process.Path == "test" and Process.CommandLine == "test"']
+
+
+def test_uberagent_620_isnull():
+    with pytest.raises(MissingFunctionException):
+        uberagent(processing_pipeline=uberagent620()).convert(
+            SigmaCollection.from_yaml("""
+                title: Test
+                status: test
+                logsource:
+                    product: windows
+                    category: process_creation
+                detection:
+                    sel:
+                        Image: null
+                    condition: sel
+            """), "conf")

@@ -84,13 +84,6 @@ def select_rules(rules_path) -> dict:
 
 
 def write_directory(outdir: str, selected_rules: list):
-    # Check if the directory already exists
-    if os.path.exists(outdir):
-        raise FileExistsError(f"Directory '{outdir}' already exists.")
-
-    # Create the directory
-    os.makedirs(outdir)
-
     # Copy the selected files into the directory
     for rule_path in selected_rules:
         # Get the file name from the rule_path
@@ -104,6 +97,22 @@ def write_directory(outdir: str, selected_rules: list):
 
 
 def main(args) -> int:
+
+    print("[I] Preparing output...")
+    for level in LEVEL:
+        for platform in PLATFORM:
+            if not args.skip_platform:
+                outdir = f"sigma-{level}-{platform}"
+            else:
+                outdir = f"sigma-{level}"
+
+            # Check if the directory already exists
+            if os.path.exists(outdir):
+                raise FileExistsError(f"Directory '{outdir}' already exists.")
+
+            # Create the directory
+            os.makedirs(outdir)
+
 
     print("[I] Parsing and selecting rules, this will take some time...")
     selected_rules = select_rules(args.rule_path)

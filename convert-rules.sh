@@ -48,15 +48,12 @@ BASE_DIR="$1"
 
 # Define an associative array with source paths as keys and output files as values
 declare -A configs=(
-    ["sigma-critical-"]="uberAgent-ESA-am-sigma-critical-"
-    ["sigma-high-"]="uberAgent-ESA-am-sigma-high-"
-    ["sigma-informational-"]="uberAgent-ESA-am-sigma-informational-"
-    ["sigma-low-"]="uberAgent-ESA-am-sigma-low-"
-    ["sigma-medium-"]="uberAgent-ESA-am-sigma-medium-"
+    ["sigma-critical"]="uberAgent-ESA-am-sigma-critical"
+    ["sigma-high"]="uberAgent-ESA-am-sigma-high"
+    ["sigma-informational"]="uberAgent-ESA-am-sigma-informational"
+    ["sigma-low"]="uberAgent-ESA-am-sigma-low"
+    ["sigma-medium"]="uberAgent-ESA-am-sigma-medium"
 )
-
-# Define an array of platforms
-declare -a platforms=("windows" "macos" "common")
 
 # Pattern and target are the same for all commands
 TARGET="uberagent"
@@ -68,11 +65,12 @@ PIPELINE="${2:-uberagent}"
 declare -a summaryMessages=()
 declare -a summaryEmptyMessages=()
 
-# Loop over the platforms, configs, and run the sigma converter command
-for PLATFORM in "${platforms[@]}"; do
-    for REL_PATH in "${!configs[@]}"; do
-        SOURCE_PATH="$BASE_DIR/${REL_PATH}${PLATFORM}/"
-        OUTPUT_FILE="${configs[$REL_PATH]}${PLATFORM}.conf"
+# Loop over the directories and run the sigma converter command
+for dir in ${BASE_DIR}/*; do
+
+    if [ -d "$dir" ]; then
+        DIR_NAME=$(basename "$dir")
+        OUTPUT_FILE="uberAgent-ESA-am-$DIR_NAME.conf"
 
         # Define the header
         HEADER="
@@ -81,7 +79,7 @@ for PLATFORM in "${platforms[@]}"; do
 # To generate the ruleset, please follow the instructions provided in the repository: https://github.com/vastlimits/pySigma-backend-uberAgent/
 #
 # The command used to generate the ruleset is:
-#    sigma convert -s -f conf -p $PIPELINE -t $TARGET $SOURCE_PATH >> $OUTPUT_FILE
+#    sigma convert -s -f conf -p $PIPELINE -t $TARGET $dir >> $OUTPUT_FILE
 #
 # The rules in this file are marked with sigma-level: $(basename "${REL_PATH%-}")
 #
@@ -91,9 +89,9 @@ for PLATFORM in "${platforms[@]}"; do
         echo -e "$HEADER" > "$OUTPUT_FILE"
 
         # Run the sigma converter command and append the output to the file
-        sigma convert -s -f conf -p "$PIPELINE" -t "$TARGET" "$SOURCE_PATH" >> "$OUTPUT_FILE"
+        sigma convert -s -f conf -p "$PIPELINE" -t "$TARGET" "$dir" >> "$OUTPUT_FILE"
 
-        echo "Conversion completed, output saved to $OUTPUT_FILE"
+        # echo "Conversion completed, output saved to $OUTPUT_FILE"
 
         # Count the occurrences of [ActivityMonitoringRule] in the output file
         RULE_COUNT=$(grep -o 'ActivityMonitoringRule' "$OUTPUT_FILE" | wc -l)
@@ -104,7 +102,7 @@ for PLATFORM in "${platforms[@]}"; do
         else
             summaryMessages+=("File $OUTPUT_FILE contains $RULE_COUNT rules.")
         fi
-    done
+    fi
 done
 
 # Print the summary messages

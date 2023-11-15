@@ -61,17 +61,21 @@ def select_rules(rules_path) -> dict:
         include = "level" in rule
 
         # Include if product is not specified (common)
-        platform = "common"
+        if not args.skip_platform:
+            platform = "common"
 
-        if "product" in logsource:
-            # Ensure to read the platform from rule.
-            platform = logsource["product"]
+            if "product" in logsource:
+                # Ensure to read the platform from rule.
+                platform = logsource["product"]
 
-        # Make sure the platform matches.
-        include = include and platform in PLATFORM
+            # Make sure the platform matches.
+            include = include and platform in PLATFORM
 
         if include:
-            key = "sigma-{}-{}".format(rule["level"], platform)
+            if not args.skip_platform:
+                key = "sigma-{}-{}".format(rule["level"], platform)
+            else:
+                key = "sigma-{}".format(rule["level"])
             if key not in result:
                 result[key] = []
             result[key].append(file)
@@ -112,6 +116,7 @@ def main(args) -> int:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Creates directories with selected Sigma rules.")
     parser.add_argument("rule_path", help="Path to the directory containing Sigma rule files.")
+    parser.add_argument("--skip_platform", help="Skips the platform identifier.", action=argparse.BooleanOptionalAction)
     args = parser.parse_args()
 
     sys.exit(main(args))

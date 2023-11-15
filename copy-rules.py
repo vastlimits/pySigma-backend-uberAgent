@@ -110,12 +110,11 @@ def main(args) -> int:
     print("[I] Preparing output...")
     if not args.skip_platform:
         for level in LEVEL:
-            prepare_directory(outdir)
+            prepare_directory(f"sigma-{level}")
     else:
         for level in LEVEL:
             for platform in PLATFORM:
-                outdir = f"sigma-{level}-{platform}"
-                prepare_directory(outdir)
+                prepare_directory(f"sigma-{level}-{platform}")
 
 
     print("[I] Parsing and selecting rules, this will take some time...")

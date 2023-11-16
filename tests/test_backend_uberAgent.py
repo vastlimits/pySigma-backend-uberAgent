@@ -167,7 +167,7 @@ def test_uberAgent_regex_query1(uberAgent_backend: uberagent):
                     fieldB: foo
                 condition: sel
         """)
-    ) == ['regex_match(fieldA, r"foo.*bar") and fieldB == "foo"']
+    ) == ['regex_match(fieldA, "foo.*bar") and fieldB == "foo"']
 
 
 def test_uberAgent_regex_query2(uberAgent_backend: uberagent):
@@ -183,7 +183,7 @@ def test_uberAgent_regex_query2(uberAgent_backend: uberagent):
                     field|re: '[A-Z]'
                 condition: not sel
         """)
-    ) == ['not regex_match(field, r"[A-Z]")']
+    ) == ['not regex_match(field, "[A-Z]")']
 
 
 def test_uberAgent_regex_query3(uberAgent_backend: uberagent):
@@ -199,7 +199,7 @@ def test_uberAgent_regex_query3(uberAgent_backend: uberagent):
                     field|re: '"([^"]*)"'
                 condition: not sel
         """)
-    ) == ['not regex_match(field, r"\\"([^\\"]*)\\"")']
+    ) == ['not regex_match(field, "\\"([^\\"]*)\\"")']
 
 
 def test_uberAgent_wildcard_match_expression(uberAgent_backend: uberagent):

@@ -129,7 +129,7 @@ class uberagent(TextQueryBackend):
     # Regular expression query as format string with placeholders {field}, {regex}, {flag_x} where x
     # is one of the flags shortcuts supported by Sigma (currently i, m and s) and refers to the
     # token stored in the class variable re_flags.
-    re_expression: ClassVar[str] = 'regex_match({field}, r"{regex}")'
+    re_expression: ClassVar[str] = 'regex_match({field}, "{regex}")'
 
     # Character used for escaping in regular expressions
     re_escape_char: ClassVar[str] = "\\"

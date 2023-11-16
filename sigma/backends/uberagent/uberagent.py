@@ -108,8 +108,8 @@ class uberagent(TextQueryBackend):
     # Values
     str_quote: ClassVar[str] = '"'  # string quoting character (added as escaping character)
     escape_char: ClassVar[str] = "\\"  # Escaping character for special characters inside string
-    wildcard_multi: ClassVar[str] = "*"  # Character used as multi-character wildcard
-    wildcard_single: ClassVar[str] = "*"  # Character used as single-character wildcard
+    wildcard_multi: ClassVar[str] = "%"  # Character used as multi-character wildcard
+    wildcard_single: ClassVar[str] = "_"  # Character used as single-character wildcard
     add_escaped: ClassVar[str] = "\\"  # Characters quoted in addition to wildcards and string quote
     filter_chars: ClassVar[str] = ""  # Characters filtered
     bool_values: ClassVar[Dict[bool, str]] = {  # Values to which boolean values are mapped.
@@ -118,9 +118,18 @@ class uberagent(TextQueryBackend):
     }
 
     # String matching operators. if none is appropriate eq_token is used.
-    startswith_expression: ClassVar[str] = "istartswith({field}, {value})"
-    endswith_expression: ClassVar[str] = "iendswith({field}, {value})"
-    contains_expression: ClassVar[str] = "icontains({field}, {value})"
+    #
+    # 2023-11-16: Disabled because of performance regression vs 'like'.
+    #             The 'like' operator is much faster and less resource-hungry than using the functions.
+    #             Should be enabled again in a future version; after polishing the mentioned functions.
+    #
+    # startswith_expression: ClassVar[str] = "istartswith({field}, {value})"
+    # endswith_expression: ClassVar[str] = "iendswith({field}, {value})"
+    # contains_expression: ClassVar[str] = "icontains({field}, {value})"
+
+    startswith_expression: ClassVar[str] = None
+    endswith_expression: ClassVar[str] = None
+    contains_expression: ClassVar[str] = None
 
     # Special expression if wildcards can't be matched with the eq_token operator
     wildcard_match_expression: ClassVar[str] = '{field} like {value}'

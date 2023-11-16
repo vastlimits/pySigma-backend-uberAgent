@@ -102,7 +102,7 @@ def test_uberAgent_in_expression(uberAgent_backend: uberagent):
                         - valueC*
                 condition: sel
         """)
-    ) == ['fieldA == "valueA" or fieldA == "valueB" or istartswith(fieldA, "valueC")']
+    ) == ['fieldA == "valueA" or fieldA == "valueB" or fieldA like "valueC%"']
 
 
 def test_uberAgent_cidr_query(uberAgent_backend: uberagent):
@@ -118,7 +118,7 @@ def test_uberAgent_cidr_query(uberAgent_backend: uberagent):
                     field|cidr: 192.168.0.0/16
                 condition: sel
         """)
-    ) == ['istartswith(field, "192.168.")']
+    ) == ['field like "192.168.%"']
 
 
 def test_uberAgent_null_query(uberAgent_backend: uberagent):
@@ -216,4 +216,4 @@ def test_uberAgent_wildcard_match_expression(uberAgent_backend: uberagent):
                       - 'Test*Field'
                 condition: sel
         """)
-    ) == ['field like "*Test*Field"']
+    ) == ['field like "%Test%Field"']

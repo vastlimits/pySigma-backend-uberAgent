@@ -21,14 +21,14 @@ def get_mitre_annotation_from_tag(tag):
     return None
 
 
-def ua_annotation(version: Version, tags: list[str], author: str) -> str | None:
+def ua_annotation(version: Version, tags: List[str], author: str) -> Optional[str]:
     mitre_annotation_objects = []
     for tag in tags:
         mitre_annotation = get_mitre_annotation_from_tag(tag)
         if mitre_annotation is not None:
             mitre_annotation_objects.append(mitre_annotation)
 
-    result = dict()
+    result: dict = {}
 
     if len(mitre_annotation_objects) > 0:
         result['mitre_attack'] = mitre_annotation_objects

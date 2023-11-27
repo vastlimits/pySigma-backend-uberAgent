@@ -21,15 +21,26 @@ def get_mitre_annotation_from_tag(tag):
     return None
 
 
-def ua_annotation(tags) -> str:
+def ua_annotation(version: Version, tags: list[str], author: str) -> str | None:
     mitre_annotation_objects = []
     for tag in tags:
         mitre_annotation = get_mitre_annotation_from_tag(tag)
         if mitre_annotation is not None:
             mitre_annotation_objects.append(mitre_annotation)
 
+    result = dict()
+
     if len(mitre_annotation_objects) > 0:
-        return json.dumps({'mitre_attack': mitre_annotation_objects})
+        result['mitre_attack'] = mitre_annotation_objects
+
+    # New in upcoming version: Author is included in annotations.
+    if version.is_version_develop() and author is not None:
+        result['author'] = author
+
+    if len(result.keys()) > 0:
+        return json.dumps(result)
+
+    return None
 
 
 def ua_tag(name: str) -> str:
@@ -277,6 +288,7 @@ class uberagent(TextQueryBackend):
         if rule.title is None or len(rule.title) == 0:
             raise MissingPropertyException("title")
 
+        version = self.get_version_from_state(state)
 
         ua_rule: Rule = Rule(self.get_version_from_state(state))
         ua_rule.set_query(self.finalize_query_default(rule, query, index, state))
@@ -287,7 +299,7 @@ class uberagent(TextQueryBackend):
         ua_rule.set_risk_score(ua_risk_score(rule.level))
         ua_rule.set_description(rule.description)
         ua_rule.set_author(rule.author)
-        ua_rule.set_annotation(ua_annotation(rule.tags))
+        ua_rule.set_annotation(ua_annotation(version, rule.tags, rule.author))
         ua_rule.set_generic_properties(state.processing_state["Fields"])
         ua_rule.set_platform(rule.logsource.product)
 

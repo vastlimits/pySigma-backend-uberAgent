@@ -160,6 +160,71 @@ def test_rule_annotation():
                 condition: sel
         """), "conf") == [expected]
 
+
+def test_rule_annotation_with_author():
+    expected = \
+        '[ActivityMonitoringRule platform=Windows]\n' \
+        '# This is a test rule.\n' \
+        '# Author: Unit Test\n' \
+        'RuleId = 01234567-1234-5678-1234-567890123456\n' \
+        'RuleName = Test\n' \
+        'EventType = Process.Start\n' \
+        'Tag = proc-start-test\n' \
+        'Annotation = {"mitre_attack": ["T0001", "T0002"], "author": "Unit Test"}\n' \
+        'Query = Process.Path == "test" and Process.CommandLine == "test"\n'
+
+    assert uberagent(processing_pipeline=uberagent_develop()).convert(
+        SigmaCollection.from_yaml("""
+            id: 01234567-1234-5678-1234-567890123456
+            title: Test
+            description: This is a test rule.
+            status: test
+            author: Unit Test
+            tags:
+                - attack.t0001
+                - attack.t0002
+                - attack.defense_evasion
+            logsource:
+                product: windows
+                category: process_creation
+            detection:
+                sel:
+                    Image: test
+                    CommandLine: test
+                condition: sel
+        """), "conf") == [expected]
+
+
+def test_rule_annotation_with_author_without_mitre_tags():
+    expected = \
+        '[ActivityMonitoringRule platform=Windows]\n' \
+        '# This is a test rule.\n' \
+        '# Author: Unit Test\n' \
+        'RuleId = 01234567-1234-5678-1234-567890123456\n' \
+        'RuleName = Test\n' \
+        'EventType = Process.Start\n' \
+        'Tag = proc-start-test\n' \
+        'Annotation = {"author": "Unit Test"}\n' \
+        'Query = Process.Path == "test" and Process.CommandLine == "test"\n'
+
+    assert uberagent(processing_pipeline=uberagent_develop()).convert(
+        SigmaCollection.from_yaml("""
+            id: 01234567-1234-5678-1234-567890123456
+            title: Test
+            description: This is a test rule.
+            status: test
+            author: Unit Test
+            logsource:
+                product: windows
+                category: process_creation
+            detection:
+                sel:
+                    Image: test
+                    CommandLine: test
+                condition: sel
+        """), "conf") == [expected]
+
+
 # Test "common" rule without specific product.
 def test_rule_network_any_common():
     expected = \

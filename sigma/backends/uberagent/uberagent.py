@@ -132,7 +132,7 @@ class uberagent(TextQueryBackend):
     contains_expression: ClassVar[str] = None
 
     # Special expression if wildcards can't be matched with the eq_token operator
-    wildcard_match_expression: ClassVar[str] = '{field} like {value}'
+    wildcard_match_expression: ClassVar[str] = '{field} like r{value}'
 
     # Regular expressions
     # Regular expression query as format string with placeholders {field}, {regex}, {flag_x} where x

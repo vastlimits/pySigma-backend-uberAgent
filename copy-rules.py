@@ -59,6 +59,7 @@ def select_rules(rules_path) -> dict:
         id = rule["id"]
         if id in ["4fc0deee-0057-4998-ab31-d24e46e0aba4", "71158e3f-df67-472b-930e-7d287acaa3e1"]:
             print("[I]: Ignore rule because of known false positives.")
+            continue
 
         logsource = rule["logsource"]
 

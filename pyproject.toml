@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pySigma-backend-uberAgent"
-version = "0.3.54"
+version = "0.3.60"
 description = "pySigma uAQL backend"
 authors = ["vast limits GmbH <info@vastlimits.com>"]
 license = "MIT"

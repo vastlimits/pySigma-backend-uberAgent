@@ -8,10 +8,11 @@ from sigma.conversion.state import ConversionState
 from sigma.rule import SigmaRule, SigmaLevel
 from sigma.types import SigmaCompareExpression, SigmaRegularExpressionFlag
 from sigma.conversion.deferred import DeferredQueryExpression
+from sigma.processing.pipeline import ProcessingPipeline
 
 from sigma.backends.uberagent.exceptions import MissingPropertyException, MissingFunctionException
 from sigma.backends.uberagent.rule import Rule
-from sigma.pipelines.uberagent.version import Version
+from sigma.pipelines.uberagent.version import UA_VERSION_CURRENT_RELEASE, Version
 
 
 def get_mitre_annotation_from_tag(tag):
@@ -80,6 +81,10 @@ class uberagent(TextQueryBackend):
     formats: Dict[str, str] = {
         "default": "Plain uAQL queries",
         "conf": "Configuration"
+    }
+
+    config: Dict[str, Any] = {
+        "version": "str"
     }
 
     requires_pipeline: bool = True
@@ -262,6 +267,28 @@ class uberagent(TextQueryBackend):
     deferred_separator: ClassVar[str] = "\n| "  # String used to join multiple deferred query parts
     deferred_only_query: ClassVar[str] = "*"  # String used as query if final query only contains deferred expression
 
+    def __init__(self,
+                 processing_pipeline: Optional[ProcessingPipeline] = None,
+                 collect_errors: bool = False,
+                 backend_version: Optional[str] = None,
+                 **kwargs):
+
+        ua_backend_version: Version = Version(UA_VERSION_CURRENT_RELEASE)
+        if backend_version is not None:
+            ua_backend_version = Version(backend_version)
+
+        # The default behavior is to utilize the version provided by the specified pipeline.
+        # However, in certain situations, it is crucial to employ the version that is accessible
+        # as a backend configuration option.
+        #
+        # This allows for adjustments to the syntax-specific aspects of rule generation.
+
+        # Regular expressions are handled differntly in current development version.
+        if ua_backend_version.is_version_develop():
+            self.re_expression = '{field} regex "{regex}"'
+
+        super().__init__(processing_pipeline, collect_errors)
+
     def get_version_from_state(self, state: ConversionState) -> Version:
         version = Version("develop")
         if "uaVersion" in state.processing_state:
@@ -290,7 +317,7 @@ class uberagent(TextQueryBackend):
 
         version = self.get_version_from_state(state)
 
-        ua_rule: Rule = Rule(self.get_version_from_state(state))
+        ua_rule: Rule = Rule(version)
         ua_rule.set_query(self.finalize_query_default(rule, query, index, state))
         ua_rule.set_id(rule.id)
         ua_rule.set_name(rule.title)

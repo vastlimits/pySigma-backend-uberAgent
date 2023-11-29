@@ -39,7 +39,7 @@
 
 # Check if base directory is provided
 if [[ $# -lt 1 ]]; then
-    echo "Usage: $0 <base_directory> [pipeline]"
+    echo "Usage: $0 <base_directory> [pipeline] [backend]"
     exit 1
 fi
 
@@ -58,8 +58,11 @@ declare -A configs=(
 # Pattern and target are the same for all commands
 TARGET="uberagent"
 
-# Assign pipeline from second argument or default to "uberagent"
+# Assign pipeline version from second argument or default to "uberagent"
 PIPELINE="${2:-uberagent}"
+
+# Assign backend version from third argument or default to "main"
+BACKEND="${3:-main}"
 
 # Initialize an empty array to store summary messages
 declare -a summaryMessages=()
@@ -79,7 +82,7 @@ for dir in ${BASE_DIR}/*; do
 # To generate the ruleset, please follow the instructions provided in the repository: https://github.com/vastlimits/pySigma-backend-uberAgent/
 #
 # The command used to generate the ruleset is:
-#    sigma convert -s -f conf -p $PIPELINE -t $TARGET $dir >> $OUTPUT_FILE
+#    sigma convert -s -f conf -p $PIPELINE -O backend_version=$BACKEND -t $TARGET $dir >> $OUTPUT_FILE
 #
 "
 
@@ -87,7 +90,7 @@ for dir in ${BASE_DIR}/*; do
         echo -e "$HEADER" > "$OUTPUT_FILE"
 
         # Run the sigma converter command and append the output to the file
-        sigma convert -s -f conf -p "$PIPELINE" -t "$TARGET" "$dir" >> "$OUTPUT_FILE"
+        sigma convert -s -f conf -p "$PIPELINE" -O backend_version="$BACKEND" -t "$TARGET" "$dir" >> "$OUTPUT_FILE"
 
         # echo "Conversion completed, output saved to $OUTPUT_FILE"
 

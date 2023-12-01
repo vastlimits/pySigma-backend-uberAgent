@@ -96,13 +96,14 @@ def write_directory(outdir: str, selected_rules: list):
         shutil.copy(rule_path, dest_path)
 
 
-def prepare_directory(outdir: str):
+def prepare_directory(outdir: str, skip_check: bool):
     # Check if the directory already exists
     if os.path.exists(outdir):
-        raise FileExistsError(f"Directory '{outdir}' already exists.")
-
-    # Create the directory
-    os.makedirs(outdir)
+        if not skip_check:
+            raise FileExistsError(f"Directory '{outdir}' already exists.")
+    else:
+        # Create the directory
+        os.makedirs(outdir)
 
 
 def main(args) -> int:
@@ -111,10 +112,10 @@ def main(args) -> int:
     if not args.skip_platform:
         for level in LEVEL:
             for platform in PLATFORM:
-                prepare_directory(f"sigma-{level}-{platform}")
+                prepare_directory(f"sigma-{level}-{platform}", args.skip_check_directory)
     else:
         for level in LEVEL:
-            prepare_directory(f"sigma-{level}")
+            prepare_directory(f"sigma-{level}", args.skip_check_directory)
 
 
     print("[I] Parsing and selecting rules, this will take some time...")
@@ -129,6 +130,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Creates directories with selected Sigma rules.")
     parser.add_argument("rule_path", help="Path to the directory containing Sigma rule files.")
     parser.add_argument("--skip_platform", help="Skips the platform identifier.", action=argparse.BooleanOptionalAction)
+    parser.add_argument("--skip_check_directory", help="Skips the output directory check.", action=argparse.BooleanOptionalAction)
     args = parser.parse_args()
 
     sys.exit(main(args))

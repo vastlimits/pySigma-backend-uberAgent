@@ -6,7 +6,7 @@ from sigma.pipelines.common import logsource_windows_process_creation, logsource
     logsource_windows_registry_delete, logsource_windows_registry_event, logsource_windows_driver_load, \
     logsource_windows_file_rename, logsource_windows_file_delete, logsource_windows_file_change, \
     logsource_windows_file_event, logsource_windows_file_access
-from sigma.processing.conditions import LogsourceCondition, RuleProcessingItemAppliedCondition
+from sigma.processing.conditions import LogsourceCondition, RuleProcessingItemAppliedCondition, RuleContainsDetectionItemCondition
 from sigma.processing.pipeline import ProcessingPipeline, ProcessingItem
 from sigma.processing.transformations import RuleFailureTransformation, SetStateTransformation
 
@@ -162,7 +162,8 @@ ua_registry_event_mapping: Dict[str, Field] = {
     # ""                    : Field(UA_VERSION_6_0, "Reg.Key.Sddl"),
     # ""                    : Field(UA_VERSION_6_0, "Reg.Key.Hive"),
     "targetobject"          : Field(UA_VERSION_6_2, "Reg.Key.Target"),
-    # "details"             : Field(              , "Reg.Value.Data")
+    "details"               : Field(UA_VERSION_DEVELOP, "Reg.Value.Data"),
+    "eventtype"             : Field(UA_VERSION_DEVELOP, "Reg.EventType")
     # ""                    : Field(UA_VERSION_7_1, "Reg.Value.Type")
 }
 
@@ -405,6 +406,25 @@ def ua_create_mapping(uaVersion: Version, category: Logsource) -> List[Processin
             field_name_conditions=[ExcludeFieldConditionLowercase(fields=keys)]
         )
     ]
+
+    # All the event types here are supported.
+    # Any other event type raises an error.
+    items.append(
+        ProcessingItem(
+            identifier=f"ua_registry_unsupported",
+            transformation=FieldDetectionItemFailureTransformation("Cannot transform registry field <{0}>."),
+            rule_conditions=[
+                RuleContainsDetectionItemCondition(field="EventType", value="CreateKey"),
+                RuleContainsDetectionItemCondition(field="EventType", value="DeleteKey"),
+                RuleContainsDetectionItemCondition(field="EventType", value="RenameKey"),
+                RuleContainsDetectionItemCondition(field="EventType", value="DeleteValue"),
+                RuleContainsDetectionItemCondition(field="EventType", value="SetValue")
+            ],
+            rule_condition_linking=any,
+            rule_condition_negation=True,
+            field_name_conditions=[IncludeFieldConditionLowercase(fields=["eventtype"])]
+        )
+    )
 
     # Create individual field transformations for each supported field.
     # Each field is handled separately to facilitate individual state transformations.

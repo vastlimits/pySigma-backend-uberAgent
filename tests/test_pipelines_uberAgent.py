@@ -1,6 +1,6 @@
 import pytest
 from sigma.collection import SigmaCollection
-from sigma.exceptions import SigmaLevelError
+from sigma.exceptions import SigmaLevelError, SigmaTransformationError
 
 from sigma.backends.uberagent import uberagent
 from sigma.backends.uberagent.exceptions import MissingPropertyException, MissingFunctionException
@@ -411,3 +411,110 @@ def test_uberagent_620_isnull():
                         Image: null
                     condition: sel
             """), "conf")
+
+
+def test_uberagent_registry_createkey():
+    assert uberagent(processing_pipeline=uberagent_develop()).convert(
+        SigmaCollection.from_yaml("""
+            title: Test
+            status: test
+            logsource:
+                product: windows
+                category: registry_set
+            detection:
+                sel:
+                    EventType: CreateKey
+                condition: sel
+        """)) == ['Reg.EventType == "CreateKey"']
+
+
+def test_uberagent_registry_deletekey():
+    assert uberagent(processing_pipeline=uberagent_develop()).convert(
+        SigmaCollection.from_yaml("""
+            title: Test
+            status: test
+            logsource:
+                product: windows
+                category: registry_set
+            detection:
+                sel:
+                    EventType: DeleteKey
+                condition: sel
+        """)) == ['Reg.EventType == "DeleteKey"']
+
+
+def test_uberagent_registry_renamekey():
+    assert uberagent(processing_pipeline=uberagent_develop()).convert(
+        SigmaCollection.from_yaml("""
+            title: Test
+            status: test
+            logsource:
+                product: windows
+                category: registry_set
+            detection:
+                sel:
+                    EventType: RenameKey
+                condition: sel
+        """)) == ['Reg.EventType == "RenameKey"']
+
+
+def test_uberagent_registry_deletevalue():
+    assert uberagent(processing_pipeline=uberagent_develop()).convert(
+        SigmaCollection.from_yaml("""
+            title: Test
+            status: test
+            logsource:
+                product: windows
+                category: registry_set
+            detection:
+                sel:
+                    EventType: DeleteValue
+                condition: sel
+        """)) == ['Reg.EventType == "DeleteValue"']
+
+
+def test_uberagent_registry_setvalue():
+    assert uberagent(processing_pipeline=uberagent_develop()).convert(
+        SigmaCollection.from_yaml("""
+            title: Test
+            status: test
+            logsource:
+                product: windows
+                category: registry_set
+            detection:
+                sel:
+                    EventType: SetValue
+                condition: sel
+        """)) == ['Reg.EventType == "SetValue"']
+
+
+def test_uberagent_registry_unsupported_createvalue():
+    with pytest.raises(SigmaTransformationError):
+        uberagent(processing_pipeline=uberagent_develop()).convert(
+            SigmaCollection.from_yaml("""
+                title: Test
+                status: test
+                logsource:
+                    product: windows
+                    category: registry_set
+                detection:
+                    sel:
+                        EventType: CreateValue
+                    condition: sel
+            """))
+
+
+def test_uberagent_registry_unsupported_renamevalue():
+    with pytest.raises(SigmaTransformationError):
+        uberagent(processing_pipeline=uberagent_develop()).convert(
+            SigmaCollection.from_yaml("""
+                title: Test
+                status: test
+                logsource:
+                    product: windows
+                    category: registry_set
+                detection:
+                    sel:
+                        EventType: RenameValue
+                    condition: sel
+            """))

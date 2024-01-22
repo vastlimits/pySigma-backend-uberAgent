@@ -1,6 +1,6 @@
 import pytest
 from sigma.collection import SigmaCollection
-from sigma.exceptions import SigmaLevelError, SigmaTransformationError
+from sigma.exceptions import SigmaLevelError, SigmaTransformationError, SigmaTitleError
 
 from sigma.backends.uberagent import uberagent
 from sigma.backends.uberagent.exceptions import MissingPropertyException, MissingFunctionException
@@ -87,7 +87,7 @@ def test_rule_requires_id():
 
 
 def test_rule_requires_title():
-    with pytest.raises(MissingPropertyException):
+    with pytest.raises(SigmaTitleError):
         uberagent(processing_pipeline=uberagent_pipeline()).convert(
             SigmaCollection.from_yaml("""
                 id: 01234567-1234-5678-1234-567890123456

@@ -596,6 +596,16 @@ def uberagent710() -> ProcessingPipeline:
     return make_pipeline(Version(UA_VERSION_7_1))
 
 
+def uberagent720() -> ProcessingPipeline:
+    """
+    Create a processing pipeline for version 7.2 of uberAgent.
+
+    Returns:
+    - ProcessingPipeline: The assembled processing pipeline for version 7.2.
+    """
+    return make_pipeline(Version(UA_VERSION_7_2))
+
+
 def uberagent_develop() -> ProcessingPipeline:
     """
     Create a processing pipeline for the development version of uberAgent.

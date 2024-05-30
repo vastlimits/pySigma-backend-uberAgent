@@ -13,6 +13,7 @@ Further, it contains the following processing pipelines in `sigma.pipelines.uber
 * uberagent-6.2.0: Compatible with uberAgent 6.2.0 events and properties.
 * uberagent-7.0.0: Compatible with uberAgent 7.0.0 events and properties.
 * uberagent-7.1.0: Compatible with uberAgent 7.1.0 events and properties.
+* uberagent-7.2.0: Compatible with uberAgent 7.2.0 events and properties.
 * uberagent-develop: Compatible with the upcoming uberAgent version.
 
 It supports the following output formats:
@@ -47,6 +48,7 @@ sigma list pipelines
 | uberagent-6.2.0   | 20       | uberAgent 6.2.0     | uberagent |
 | uberagent-7.0.0   | 20       | uberAgent 7.0.0     | uberagent |
 | uberagent-7.1.0   | 20       | uberAgent 7.1.0     | uberagent |
+| uberagent-7.2.0   | 20       | uberAgent 7.2.0     | uberagent |
 | uberagent-develop | 20       | uberAgent develop   | uberagent |
 +-------------------+----------+---------------------+-----------+
 ```

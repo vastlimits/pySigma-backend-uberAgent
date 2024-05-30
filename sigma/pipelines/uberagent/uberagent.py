@@ -16,7 +16,7 @@ from sigma.pipelines.uberagent.logsource import Logsource
 from sigma.pipelines.uberagent.transformation import ChangeLogsourceCategoryTransformation, ChangeLogsourceCategoryTransformationWindows, FieldMappingTransformationLowercase, \
     FieldDetectionItemFailureTransformation, ReferencedFieldTransformation
 from sigma.pipelines.uberagent.version import UA_VERSION_6_0, UA_VERSION_6_1, UA_VERSION_6_2, UA_VERSION_7_0, \
-    UA_VERSION_7_1, UA_VERSION_DEVELOP, UA_VERSION_CURRENT_RELEASE, Version
+    UA_VERSION_7_1, UA_VERSION_7_2, UA_VERSION_DEVELOP, UA_VERSION_CURRENT_RELEASE, Version
 
 # Maps all known Sigma fields to uberAgent Process Event Properties
 # Note: The process properties are re-usable for all event types as all events are linked to a process.
@@ -161,11 +161,11 @@ ua_registry_event_mapping: Dict[str, Field] = {
     # ""                    : Field(UA_VERSION_6_0, "Reg.File.Name"),
     # ""                    : Field(UA_VERSION_6_0, "Reg.Key.Sddl"),
     # ""                    : Field(UA_VERSION_6_0, "Reg.Key.Hive"),
-    "targetobject"          : Field(UA_VERSION_DEVELOP, "Reg.TargetObject"),
-    "details"               : Field(UA_VERSION_DEVELOP, "Reg.Value.Data"),
-    # ""                    : Field(UA_VERSION_DEVELOP, "Reg.Value.Data.Number")
-    # ""                    : Field(UA_VERSION_DEVELOP, "Reg.Value.Data.String")
-    "eventtype"             : Field(UA_VERSION_DEVELOP, "Reg.EventType")
+    "targetobject"          : Field(UA_VERSION_7_2, "Reg.TargetObject"),
+    "details"               : Field(UA_VERSION_7_2, "Reg.Value.Data"),
+    # ""                    : Field(UA_VERSION_7_2, "Reg.Value.Data.Number")
+    # ""                    : Field(UA_VERSION_7_2, "Reg.Value.Data.String")
+    "eventtype"             : Field(UA_VERSION_7_2, "Reg.EventType")
     # ""                    : Field(UA_VERSION_7_1, "Reg.Value.Type")
 }
 

@@ -7,3 +7,4 @@ dist/
 docs/_build
 uberAgent-ESA-am-sigma-*.conf
 build/*
+.venv

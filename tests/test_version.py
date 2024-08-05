@@ -103,7 +103,6 @@ def test_version_develop(version, expected):
    assert Version(version).is_version_develop() == expected
 
 
-
 @pytest.mark.parametrize("platform,version,expected", [
    ("windows", UA_VERSION_6_0, True),
    ("windows", UA_VERSION_6_1, True),
@@ -166,6 +165,22 @@ def test_version_develop(platform,version, expected):
    (UA_VERSION_7_1, UA_VERSION_7_2, True),
    (UA_VERSION_7_1, UA_VERSION_7_3, True),
    (UA_VERSION_7_1, UA_VERSION_DEVELOP, True),
+
+   (UA_VERSION_7_2, UA_VERSION_6_0, False),
+   (UA_VERSION_7_2, UA_VERSION_6_1, False),
+   (UA_VERSION_7_2, UA_VERSION_7_0, False),
+   (UA_VERSION_7_2, UA_VERSION_7_1, False),
+   (UA_VERSION_7_2, UA_VERSION_7_2, True),
+   (UA_VERSION_7_2, UA_VERSION_7_3, True),
+   (UA_VERSION_7_2, UA_VERSION_DEVELOP, True),
+
+   (UA_VERSION_7_3, UA_VERSION_6_0, False),
+   (UA_VERSION_7_3, UA_VERSION_6_1, False),
+   (UA_VERSION_7_3, UA_VERSION_7_0, False),
+   (UA_VERSION_7_3, UA_VERSION_7_1, False),
+   (UA_VERSION_7_3, UA_VERSION_7_2, False),
+   (UA_VERSION_7_3, UA_VERSION_7_3, True),
+   (UA_VERSION_7_3, UA_VERSION_DEVELOP, True),
 
    (UA_VERSION_DEVELOP, UA_VERSION_6_0, False),
    (UA_VERSION_DEVELOP, UA_VERSION_6_1, False),

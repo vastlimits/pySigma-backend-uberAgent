@@ -42,7 +42,7 @@ def test_ua_macos():
 
 def test_rule_process_creation():
     expected = \
-        '[ActivityMonitoringRule platform=Windows]\n' \
+        '[ThreatDetectionRule platform=Windows]\n' \
         'RuleId = 01234567-1234-5678-1234-567890123456\n' \
         'RuleName = Test\n' \
         'EventType = Process.Start\n' \
@@ -104,7 +104,7 @@ def test_rule_requires_title():
 
 def test_rule_description():
     expected = \
-        '[ActivityMonitoringRule platform=Windows]\n' \
+        '[ThreatDetectionRule platform=Windows]\n' \
         '# This is a test rule.\n' \
         'RuleId = 01234567-1234-5678-1234-567890123456\n' \
         'RuleName = Test\n' \
@@ -131,7 +131,7 @@ def test_rule_description():
 
 def test_rule_annotation():
     expected = \
-        '[ActivityMonitoringRule platform=Windows]\n' \
+        '[ThreatDetectionRule platform=Windows]\n' \
         '# This is a test rule.\n' \
         'RuleId = 01234567-1234-5678-1234-567890123456\n' \
         'RuleName = Test\n' \
@@ -163,7 +163,7 @@ def test_rule_annotation():
 
 def test_rule_annotation_with_author():
     expected = \
-        '[ActivityMonitoringRule platform=Windows]\n' \
+        '[ThreatDetectionRule platform=Windows]\n' \
         '# This is a test rule.\n' \
         '# Author: Unit Test\n' \
         'RuleId = 01234567-1234-5678-1234-567890123456\n' \
@@ -197,7 +197,7 @@ def test_rule_annotation_with_author():
 
 def test_rule_annotation_with_author_without_mitre_tags():
     expected = \
-        '[ActivityMonitoringRule platform=Windows]\n' \
+        '[ThreatDetectionRule platform=Windows]\n' \
         '# This is a test rule.\n' \
         '# Author: Unit Test\n' \
         'RuleId = 01234567-1234-5678-1234-567890123456\n' \
@@ -228,7 +228,7 @@ def test_rule_annotation_with_author_without_mitre_tags():
 # Test "common" rule without specific product.
 def test_rule_network_any_common():
     expected = \
-        '[ActivityMonitoringRule]\n' \
+        '[ThreatDetectionRule]\n' \
         'RuleId = 01234567-1234-5678-1234-567890123456\n' \
         'RuleName = Test\n' \
         'EventType = Net.Any\n' \

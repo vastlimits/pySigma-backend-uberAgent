@@ -12,6 +12,7 @@ from sigma.pipelines.uberagent.field import Field
    (UA_VERSION_7_0, True),
    (UA_VERSION_7_1, True),
    (UA_VERSION_7_2, True),
+   (UA_VERSION_7_3, True),
    (UA_VERSION_DEVELOP, True),
 ])
 def test_version_6_1(version, expected):
@@ -25,6 +26,7 @@ def test_version_6_1(version, expected):
    (UA_VERSION_7_0, True),
    (UA_VERSION_7_1, True),
    (UA_VERSION_7_2, True),
+   (UA_VERSION_7_3, True),
    (UA_VERSION_DEVELOP, True),
 ])
 def test_version_6_2(version, expected):
@@ -38,6 +40,7 @@ def test_version_6_2(version, expected):
    (UA_VERSION_7_0, True),
    (UA_VERSION_7_1, True),
    (UA_VERSION_7_2, True),
+   (UA_VERSION_7_3, True),
    (UA_VERSION_DEVELOP, True),
 ])
 def test_version_7_0(version, expected):
@@ -176,6 +179,10 @@ def test_logsource_supported(logsource_version, version, expected):
    field: Field = Field(logsource_version, "TestField")
    version_object: Version = Version(version)
    assert version_object.is_logsource_supported(Logsource(logsource_version, "Test")) == expected and version_object.is_field_supported(field) == expected
+
+
+def test_current_release():
+   assert UA_VERSION_CURRENT_RELEASE == UA_VERSION_7_3
 
 
 def test_version_str():

@@ -624,13 +624,3 @@ def uberagent_develop() -> ProcessingPipeline:
     - ProcessingPipeline: The assembled processing pipeline for the development version.
     """
     return make_pipeline(Version(UA_VERSION_DEVELOP))
-
-
-def uberagent_test(version: str = UA_VERSION_DEVELOP) -> ProcessingPipeline:
-    """
-    Create a processing pipeline for the given version of uberAgent.
-
-    Returns:
-    - ProcessingPipeline: The assembled processing pipeline for the development version.
-    """
-    return make_pipeline(Version(version))

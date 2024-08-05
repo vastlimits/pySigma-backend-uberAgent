@@ -4,7 +4,7 @@ from sigma.exceptions import SigmaLevelError, SigmaTransformationError, SigmaTit
 
 from sigma.backends.uberagent import uberagent
 from sigma.backends.uberagent.exceptions import MissingPropertyException, MissingFunctionException
-from sigma.pipelines.uberagent import uberagent as uberagent_pipeline, uberagent600, uberagent610, uberagent620, uberagent700, uberagent710, uberagent720, uberagent730, uberagent_develop, uberagent_test
+from sigma.pipelines.uberagent import uberagent as uberagent_pipeline, uberagent600, uberagent610, uberagent620, uberagent700, uberagent710, uberagent720, uberagent730, uberagent_develop
 
 
 def test_ua_windows():
@@ -277,7 +277,7 @@ def test_rule_unknown_risk_score():
 
 def test_rule_not_supported():
     with pytest.raises(Exception):
-        assert uberagent(processing_pipeline=uberagent_test("6.0.0")).convert(
+        assert uberagent(processing_pipeline=uberagent600()).convert(
             SigmaCollection.from_yaml("""
                 title: Test
                 id: 01234567-1234-5678-1234-567890123456

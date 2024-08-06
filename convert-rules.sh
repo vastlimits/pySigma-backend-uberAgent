@@ -95,7 +95,9 @@ for dir in ${BASE_DIR}/*; do
         # echo "Conversion completed, output saved to $OUTPUT_FILE"
 
         # Count the occurrences of [ActivityMonitoringRule] in the output file
-        RULE_COUNT=$(grep -o 'ActivityMonitoringRule' "$OUTPUT_FILE" | wc -l)
+        RULE_COUNT_AMR=$(grep -o 'ActivityMonitoringRule' "$OUTPUT_FILE" | wc -l)
+        RULE_COUNT_TDR=$(grep -o 'ThreatDetectionRule' "$OUTPUT_FILE" | wc -l)
+        RULE_COUNT=$(($RULE_COUNT_AMR + $RULE_COUNT_TDR))
 
         # Check if the file contains 0 rules
         if [ $RULE_COUNT -eq 0 ]; then

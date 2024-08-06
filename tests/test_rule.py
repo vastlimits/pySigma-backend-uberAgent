@@ -1,7 +1,7 @@
 import pytest
 
 from sigma.backends.uberagent.rule import MalformedRuleException, Rule
-from sigma.pipelines.uberagent.version import Version
+from sigma.pipelines.uberagent.version import UA_VERSION_DEVELOP, Version
 
 WITH_FIELD_RULE_ID = True
 WITH_FIELD_ANNOTATION = True
@@ -10,16 +10,19 @@ WITHOUT_FIELD_ANNOTATION = False
 WITH_HIVE = True
 WITHOUT_HIVE = False
 
+STANZA_AMR = "ActivityMonitoringRule"
+STANZA_TDR = "ThreatDetectionRule"
+
 def test_rule_minimum_fields():
     expected = \
-        '[ActivityMonitoringRule]\n' \
+        '[ThreatDetectionRule]\n' \
         'RuleId = Test\n' \
         'RuleName = Test\n' \
         'EventType = Test\n' \
         'Tag = Test\n' \
         'Query = true\n'
 
-    rule = Rule(Version("develop"))
+    rule = Rule(Version(UA_VERSION_DEVELOP))
     rule.set_id("Test")
     rule.set_event_type("Test")
     rule.set_tag("Test")
@@ -53,27 +56,27 @@ def test_rule_creation(version, method_values, expected_exception):
         str(rule)  # Should not raise any exception
 
 
-@pytest.mark.parametrize("version,with_id", [
-    ("6.0.0", WITHOUT_FIELD_RULE_ID),
-    ("6.1.0", WITHOUT_FIELD_RULE_ID),
-    ("6.2.0", WITHOUT_FIELD_RULE_ID),
-    ("7.0.0", WITH_FIELD_RULE_ID),
-    ("7.1.0", WITH_FIELD_RULE_ID),
-    ("develop", WITH_FIELD_RULE_ID),
-    ("main", WITH_FIELD_RULE_ID)
+@pytest.mark.parametrize("version,with_id,stanza", [
+    ("6.0.0", WITHOUT_FIELD_RULE_ID, STANZA_AMR),
+    ("6.1.0", WITHOUT_FIELD_RULE_ID, STANZA_AMR),
+    ("6.2.0", WITHOUT_FIELD_RULE_ID, STANZA_AMR),
+    ("7.0.0", WITH_FIELD_RULE_ID, STANZA_AMR),
+    ("7.1.0", WITH_FIELD_RULE_ID, STANZA_AMR),
+    ("7.2.0", WITH_FIELD_RULE_ID, STANZA_TDR),
+    ("7.3.0", WITH_FIELD_RULE_ID, STANZA_TDR),
+    ("develop", WITH_FIELD_RULE_ID, STANZA_TDR),
+    ("main", WITH_FIELD_RULE_ID, STANZA_TDR)
 ])
-def test_rule_id(version, with_id):
-    expected_with_id = \
-        '[ActivityMonitoringRule]\n' \
-        'RuleId = Test\n' \
+def test_rule_id(version, with_id, stanza):
+    expected_with_id = '[{}]\n'.format(stanza)
+    expected_with_id += 'RuleId = Test\n' \
         'RuleName = Test\n' \
         'EventType = Test\n' \
         'Tag = Test\n' \
         'Query = true\n'
 
-    expected_without_id = \
-        '[ActivityMonitoringRule]\n' \
-        'RuleName = Test\n' \
+    expected_without_id = '[{}]\n'.format(stanza)
+    expected_without_id += 'RuleName = Test\n' \
         'EventType = Test\n' \
         'Tag = Test\n' \
         'Query = true\n'
@@ -90,28 +93,28 @@ def test_rule_id(version, with_id):
         assert str(rule) == expected_without_id
 
 
-@pytest.mark.parametrize("version,with_id,with_annotation", [
-    ("6.0.0", WITHOUT_FIELD_RULE_ID, WITHOUT_FIELD_ANNOTATION),
-    ("6.1.0", WITHOUT_FIELD_RULE_ID, WITHOUT_FIELD_ANNOTATION),
-    ("6.2.0", WITHOUT_FIELD_RULE_ID, WITHOUT_FIELD_ANNOTATION),
-    ("7.0.0", WITH_FIELD_RULE_ID, WITH_FIELD_ANNOTATION),
-    ("7.1.0", WITH_FIELD_RULE_ID, WITH_FIELD_ANNOTATION),
-    ("develop", WITH_FIELD_RULE_ID, WITH_FIELD_ANNOTATION),
-    ("main", WITH_FIELD_RULE_ID, WITH_FIELD_ANNOTATION)
+@pytest.mark.parametrize("version,with_id,with_annotation,stanza", [
+    ("6.0.0", WITHOUT_FIELD_RULE_ID, WITHOUT_FIELD_ANNOTATION, STANZA_AMR),
+    ("6.1.0", WITHOUT_FIELD_RULE_ID, WITHOUT_FIELD_ANNOTATION, STANZA_AMR),
+    ("6.2.0", WITHOUT_FIELD_RULE_ID, WITHOUT_FIELD_ANNOTATION, STANZA_AMR),
+    ("7.0.0", WITH_FIELD_RULE_ID, WITH_FIELD_ANNOTATION, STANZA_AMR),
+    ("7.1.0", WITH_FIELD_RULE_ID, WITH_FIELD_ANNOTATION, STANZA_AMR),
+    ("7.2.0", WITH_FIELD_RULE_ID, WITH_FIELD_ANNOTATION, STANZA_TDR),
+    ("7.3.0", WITH_FIELD_RULE_ID, WITH_FIELD_ANNOTATION, STANZA_TDR),
+    ("develop", WITH_FIELD_RULE_ID, WITH_FIELD_ANNOTATION, STANZA_TDR),
+    ("main", WITH_FIELD_RULE_ID, WITH_FIELD_ANNOTATION, STANZA_TDR)
 ])
-def test_rule_annotation(version, with_id, with_annotation):
-    expected_with = \
-        '[ActivityMonitoringRule]\n' \
-        'RuleId = Test\n' \
+def test_rule_annotation(version, with_id, with_annotation, stanza):
+    expected_with = '[{}]\n'.format(stanza)
+    expected_with += 'RuleId = Test\n' \
         'RuleName = Test\n' \
         'EventType = Test\n' \
         'Tag = Test\n' \
         'Annotation = Test\n' \
         'Query = true\n'
 
-    expected_without = \
-        '[ActivityMonitoringRule]\n' \
-        'RuleName = Test\n' \
+    expected_without = '[{}]\n'.format(stanza)
+    expected_without += 'RuleName = Test\n' \
         'EventType = Test\n' \
         'Tag = Test\n' \
         'Query = true\n'
@@ -141,6 +144,8 @@ def test_rule_annotation(version, with_id, with_annotation):
     ("6.2.0", "Process.Start", WITHOUT_HIVE),
     ("7.0.0", "Process.Start", WITHOUT_HIVE),
     ("7.1.0", "Process.Start", WITHOUT_HIVE),
+    ("7.2.0", "Process.Start", WITHOUT_HIVE),
+    ("7.3.0", "Process.Start", WITHOUT_HIVE),
     ("develop", "Process.Start", WITHOUT_HIVE),
     ("main", "Process.Start", WITHOUT_HIVE)
 ])
@@ -158,14 +163,14 @@ def test_rule_reg_hive(version, event_type, with_hive):
 
 def test_rule_platform_windows():
     expected = \
-        '[ActivityMonitoringRule platform=Windows]\n' \
+        '[ThreatDetectionRule platform=Windows]\n' \
         'RuleId = Test\n' \
         'RuleName = Test\n' \
         'EventType = Test\n' \
         'Tag = Test\n' \
         'Query = true\n'
 
-    rule = Rule(Version("develop"))
+    rule = Rule(Version(UA_VERSION_DEVELOP))
     rule.set_platform("windows")
     rule.set_id("Test")
     rule.set_event_type("Test")
@@ -177,14 +182,14 @@ def test_rule_platform_windows():
 
 def test_rule_platform_macos():
     expected = \
-        '[ActivityMonitoringRule platform=MacOS]\n' \
+        '[ThreatDetectionRule platform=MacOS]\n' \
         'RuleId = Test\n' \
         'RuleName = Test\n' \
         'EventType = Test\n' \
         'Tag = Test\n' \
         'Query = true\n'
 
-    rule = Rule(Version("develop"))
+    rule = Rule(Version(UA_VERSION_DEVELOP))
     rule.set_platform("macos")
     rule.set_id("Test")
     rule.set_event_type("Test")
@@ -196,7 +201,7 @@ def test_rule_platform_macos():
 
 def test_rule_author_description():
     expected = \
-        '[ActivityMonitoringRule platform=MacOS]\n' \
+        '[ThreatDetectionRule platform=MacOS]\n' \
         '# Test Description\n' \
         '# Author: Test\n' \
         'RuleId = Test\n' \
@@ -205,7 +210,7 @@ def test_rule_author_description():
         'Tag = Test\n' \
         'Query = true\n'
 
-    rule = Rule(Version("develop"))
+    rule = Rule(Version(UA_VERSION_DEVELOP))
     rule.set_platform("macos")
     rule.set_id("Test")
     rule.set_event_type("Test")
@@ -218,7 +223,7 @@ def test_rule_author_description():
 
 def test_rule_generic_properties():
     expected = \
-        '[ActivityMonitoringRule]\n' \
+        '[ThreatDetectionRule]\n' \
         'RuleId = Test\n' \
         'RuleName = Test\n' \
         'EventType = Test\n' \
@@ -235,7 +240,7 @@ def test_rule_generic_properties():
         'GenericProperty9 = Field9\n' \
         'GenericProperty10 = Field10\n'
 
-    rule = Rule(Version("develop"))
+    rule = Rule(Version(UA_VERSION_DEVELOP))
     rule.set_id("Test")
     rule.set_event_type("Test")
     rule.set_tag("Test")

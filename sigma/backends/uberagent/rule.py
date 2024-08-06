@@ -127,17 +127,22 @@ class Rule:
             return self.tag
 
         return "{}-{}".format(prefixes[self.event_type], self.tag)
+    
+    def _stanza_name(self):
+        if self.version.is_version_7_2_or_newer():
+            return "ThreatDetectionRule"
+        return "ActivityMonitoringRule"
 
     def __str__(self):
         """Builds and returns the [ActivityMonitoringRule] configuration block."""
 
         # The default is available since uberagent 6.
-        result = "[ActivityMonitoringRule]\n"
+        result = "[{}]\n".format(self._stanza_name())
 
         # Starting with uberagent 7.1 and newer we slightly change the configuration stanza.
         # Example. [ActivityMonitoringRule platform=Windows] or [ActivityMonitoringRule platform=MacOS]
         if self.version.is_version_7_1_or_newer():
-            result = "[ActivityMonitoringRule"
+            result = "[{}".format(self._stanza_name())
             if self.platform in ["windows", "macos"]:
                 result += " platform="
                 if self.platform == "windows":

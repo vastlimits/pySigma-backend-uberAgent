@@ -64,6 +64,7 @@ def test_rule_creation(version, method_values, expected_exception):
     ("7.1.0", WITH_FIELD_RULE_ID, STANZA_AMR),
     ("7.2.0", WITH_FIELD_RULE_ID, STANZA_TDR),
     ("7.3.0", WITH_FIELD_RULE_ID, STANZA_TDR),
+    ("7.4.0", WITH_FIELD_RULE_ID, STANZA_TDR),
     ("develop", WITH_FIELD_RULE_ID, STANZA_TDR),
     ("main", WITH_FIELD_RULE_ID, STANZA_TDR)
 ])
@@ -101,6 +102,7 @@ def test_rule_id(version, with_id, stanza):
     ("7.1.0", WITH_FIELD_RULE_ID, WITH_FIELD_ANNOTATION, STANZA_AMR),
     ("7.2.0", WITH_FIELD_RULE_ID, WITH_FIELD_ANNOTATION, STANZA_TDR),
     ("7.3.0", WITH_FIELD_RULE_ID, WITH_FIELD_ANNOTATION, STANZA_TDR),
+    ("7.4.0", WITH_FIELD_RULE_ID, WITH_FIELD_ANNOTATION, STANZA_TDR),
     ("develop", WITH_FIELD_RULE_ID, WITH_FIELD_ANNOTATION, STANZA_TDR),
     ("main", WITH_FIELD_RULE_ID, WITH_FIELD_ANNOTATION, STANZA_TDR)
 ])
@@ -146,6 +148,7 @@ def test_rule_annotation(version, with_id, with_annotation, stanza):
     ("7.1.0", "Process.Start", WITHOUT_HIVE),
     ("7.2.0", "Process.Start", WITHOUT_HIVE),
     ("7.3.0", "Process.Start", WITHOUT_HIVE),
+    ("7.4.0", "Process.Start", WITHOUT_HIVE),
     ("develop", "Process.Start", WITHOUT_HIVE),
     ("main", "Process.Start", WITHOUT_HIVE)
 ])

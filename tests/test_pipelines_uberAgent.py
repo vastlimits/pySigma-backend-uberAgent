@@ -4,7 +4,7 @@ from sigma.exceptions import SigmaLevelError, SigmaTransformationError, SigmaTit
 
 from sigma.backends.uberagent import uberagent
 from sigma.backends.uberagent.exceptions import MissingPropertyException, MissingFunctionException
-from sigma.pipelines.uberagent import uberagent as uberagent_pipeline, uberagent600, uberagent610, uberagent620, uberagent700, uberagent710, uberagent720, uberagent730, uberagent_develop
+from sigma.pipelines.uberagent import uberagent as uberagent_pipeline, uberagent600, uberagent610, uberagent620, uberagent700, uberagent710, uberagent720, uberagent730, uberagent740, uberagent_develop
 
 
 def test_ua_windows():
@@ -399,6 +399,23 @@ def test_uberagent720():
 
 def test_uberagent730():
     assert uberagent(processing_pipeline=uberagent730()).convert(
+        SigmaCollection.from_yaml("""
+            title: Test
+            status: test
+            logsource:
+                product: windows
+                category: process_creation
+            detection:
+                sel:
+                    Image: test
+                    CommandLine: test
+                condition: sel
+        """)
+    ) == ['Process.Path == "test" and Process.CommandLine == "test"']
+
+
+def test_uberagent740():
+    assert uberagent(processing_pipeline=uberagent740()).convert(
         SigmaCollection.from_yaml("""
             title: Test
             status: test

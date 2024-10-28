@@ -16,7 +16,7 @@ from sigma.pipelines.uberagent.logsource import Logsource
 from sigma.pipelines.uberagent.transformation import ChangeLogsourceCategoryTransformation, ChangeLogsourceCategoryTransformationWindows, FieldMappingTransformationLowercase, \
     FieldDetectionItemFailureTransformation, ReferencedFieldTransformation
 from sigma.pipelines.uberagent.version import UA_VERSION_6_0, UA_VERSION_6_1, UA_VERSION_6_2, UA_VERSION_7_0, \
-    UA_VERSION_7_1, UA_VERSION_7_2, UA_VERSION_7_3, UA_VERSION_DEVELOP, UA_VERSION_CURRENT_RELEASE, Version
+    UA_VERSION_7_1, UA_VERSION_7_2, UA_VERSION_7_3, UA_VERSION_7_4, UA_VERSION_DEVELOP, UA_VERSION_CURRENT_RELEASE, Version
 
 # Maps all known Sigma fields to uberAgent Process Event Properties
 # Note: The process properties are re-usable for all event types as all events are linked to a process.
@@ -614,6 +614,16 @@ def uberagent730() -> ProcessingPipeline:
     - ProcessingPipeline: The assembled processing pipeline for version 7.3.
     """
     return make_pipeline(Version(UA_VERSION_7_3))
+
+
+def uberagent740() -> ProcessingPipeline:
+    """
+    Create a processing pipeline for version 7.4 of uberAgent.
+
+    Returns:
+    - ProcessingPipeline: The assembled processing pipeline for version 7.4.
+    """
+    return make_pipeline(Version(UA_VERSION_7_4))
 
 
 def uberagent_develop() -> ProcessingPipeline:

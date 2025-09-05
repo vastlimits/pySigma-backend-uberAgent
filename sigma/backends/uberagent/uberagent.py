@@ -47,7 +47,7 @@ def ua_annotation(version: Version, tags: List[str], author: str) -> Optional[st
 def ua_tag(name: str) -> str:
     """Converts the given Sigma rule name to uberagent ESA Tag property."""
     tag = name.lower().replace(" ", "-")
-    tag = re.sub(r"-{2,}", "-", tag, 0, re.IGNORECASE)
+    tag = re.sub(r"-{2,}", "-", tag, count=0, flags=re.IGNORECASE)
     return tag
 
 

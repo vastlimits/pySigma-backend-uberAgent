@@ -44,15 +44,11 @@ sigma list pipelines
 +-------------------+----------+---------------------+-----------+
 | Identifier        | Priority | Processing Pipeline | Backends  |
 +-------------------+----------+---------------------+-----------+
-| uberagent         | 20       | uberAgent 7.1.0     | uberagent |
-| uberagent-6.0.0   | 20       | uberAgent 6.0.0     | uberagent |
-| uberagent-6.1.0   | 20       | uberAgent 6.1.0     | uberagent |
-| uberagent-6.2.0   | 20       | uberAgent 6.2.0     | uberagent |
-| uberagent-7.0.0   | 20       | uberAgent 7.0.0     | uberagent |
 | uberagent-7.1.0   | 20       | uberAgent 7.1.0     | uberagent |
 | uberagent-7.2.0   | 20       | uberAgent 7.2.0     | uberagent |
 | uberagent-7.3.0   | 20       | uberAgent 7.3.0     | uberagent |
 | uberagent-7.4.0   | 20       | uberAgent 7.4.0     | uberagent |
+| uberagent-7.5.0   | 20       | uberAgent 7.5.0     | uberagent |
 | uberagent-develop | 20       | uberAgent develop   | uberagent |
 +-------------------+----------+---------------------+-----------+
 ```
@@ -103,7 +99,7 @@ cd pySigma-backend-uberAgent
 mkdir build
 cd build
 ../copy-rules.py "/path/to/sigma/rules"
-../convert-rules.sh $(pwd) uberagent-6.0.0
+../convert-rules.sh $(pwd) uberagent-7.5.0
 ```
 
 

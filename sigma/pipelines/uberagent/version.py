@@ -12,10 +12,11 @@ UA_VERSION_7_1 = "7.1.0"
 UA_VERSION_7_2 = "7.2.0"
 UA_VERSION_7_3 = "7.3.0"
 UA_VERSION_7_4 = "7.4.0"
+UA_VERSION_7_5 = "7.5.0"
 
-# Represents the next upcoming version (version number not yet assigned)
+# Represents the next upcoming version
 UA_VERSION_DEVELOP = "develop"
-UA_VERSION_CURRENT_RELEASE = UA_VERSION_7_3
+UA_VERSION_CURRENT_RELEASE = UA_VERSION_7_4
 
 
 class Version:
@@ -71,6 +72,9 @@ class Version:
 
     def is_version_7_4_or_newer(self) -> bool:
         return self.is_version_develop() or self._version() >= self._version_tuple(UA_VERSION_7_4)
+    
+    def is_version_7_5_or_newer(self) -> bool:
+        return self.is_version_develop() or self._version() >= self._version_tuple(UA_VERSION_7_5)
 
     def is_version_develop(self) -> bool:
         return self._outputVersion == UA_VERSION_DEVELOP

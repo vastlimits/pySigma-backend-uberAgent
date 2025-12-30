@@ -178,7 +178,10 @@ class Rule:
             result += "RuleId = {}\n".format(self.id)
 
         result += "RuleName = {}\n".format(self.name)
-        result += "EventType = {}\n".format(self.event_type)
+        # split the event types by comma
+        event_types = [et.strip() for et in self.event_type.split(",")]
+        for et in event_types:
+            result += "EventType = {}\n".format(et)
         result += "Tag = {}\n".format(self._prefixed_tag())
 
         # The RiskScore is optional.
@@ -192,7 +195,13 @@ class Rule:
 
         result += "Query = {}\n".format(self.query)
 
-        if self.event_type == "Reg.Any":
+        #print(f"Rule ID={self.id}; event type: {self.event_type}")
+        
+        # check if any of the event types is a registry event
+        if any(et.startswith("Reg.") for et in event_types):
+            if not all(et.startswith("Reg.") for et in event_types):
+                raise MalformedRuleException("Mixed event types in rule ID={}".format(self.id))
+            
             result += "Hive = HKLM,HKU\n"
 
         # uberagent supports generic properties to be added to an activity rule since version 6.1

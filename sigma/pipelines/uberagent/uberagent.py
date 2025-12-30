@@ -327,11 +327,30 @@ ua_categories: List[Logsource] = [
     # Not yet used/mappable: Logsource(UA_VERSION_6_0, "Reg.Key.Restore"),
     # Not yet used/mappable: Logsource(UA_VERSION_6_0, "Reg.Key.Replace"),
 
-    Logsource(UA_VERSION_6_0, "Reg.Any",
+    Logsource(UA_VERSION_6_0,
+              "Reg.Key.Create,Reg.Value.Write,Reg.Key.Delete,Reg.Value.Delete,Reg.Key.Rename,Reg.Key.Load,Reg.Key.Unload,Reg.Key.Save,Reg.Key.Restore,Reg.Key.Replace",
               conditions=[
                  logsource_windows_registry_event(),
+             ],
+              fields=ua_registry_event_mapping),
+
+
+    Logsource(UA_VERSION_6_0, "Reg.Key.Create,Reg.Value.Write,Reg.Key.Rename,Reg.Key.Restore,Reg.Key.Replace",
+              conditions=[
                  logsource_windows_registry_add(),
+             ],
+              fields=ua_registry_event_mapping),
+
+
+    Logsource(UA_VERSION_6_0, "Reg.Delete",
+              conditions=[
                  logsource_windows_registry_delete(),
+             ],
+              fields=ua_registry_event_mapping),
+
+
+    Logsource(UA_VERSION_6_0, "Reg.Value.Write,Reg.Key.Rename,Reg.Key.Restore,Reg.Key.Replace",
+              conditions=[
                  logsource_windows_registry_set()
              ],
               fields=ua_registry_event_mapping),

@@ -134,18 +134,9 @@ class uberagent(TextQueryBackend):
     }
 
     # String matching operators. if none is appropriate eq_token is used.
-    #
-    # 2023-11-16: Disabled because of performance regression vs 'like'.
-    #             The 'like' operator is much faster and less resource-hungry than using the functions.
-    #             Should be enabled again in a future version; after polishing the mentioned functions.
-    #
-    # startswith_expression: ClassVar[str] = "istartswith({field}, {value})"
-    # endswith_expression: ClassVar[str] = "iendswith({field}, {value})"
-    # contains_expression: ClassVar[str] = "icontains({field}, {value})"
-
-    startswith_expression: ClassVar[str] = None
-    endswith_expression: ClassVar[str] = None
-    contains_expression: ClassVar[str] = None
+    startswith_expression: ClassVar[str] = "istartswith({field}, {value})"
+    endswith_expression: ClassVar[str] = "iendswith({field}, {value})"
+    contains_expression: ClassVar[str] = "icontains({field}, {value})"
 
     # Special expression if wildcards can't be matched with the eq_token operator
     wildcard_match_expression: ClassVar[str] = '{field} like r{value}'

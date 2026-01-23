@@ -195,8 +195,6 @@ class Rule:
 
         result += "Query = {}\n".format(self.query)
 
-        #print(f"Rule ID={self.id}; event type: {self.event_type}")
-        
         # check if any of the event types is a registry event
         if any(et.startswith("Reg.") for et in event_types):
             if not all(et.startswith("Reg.") for et in event_types):

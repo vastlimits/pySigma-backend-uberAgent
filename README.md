@@ -8,14 +8,8 @@ This is the uAQL backend for pySigma. It provides the package `sigma.backends.ub
 Further, it contains the following processing pipelines in `sigma.pipelines.uberAgent`:
 
 * uberagent: Compatible with the latest released uberAgent version.
-* uberagent-6.0.0: Compatible with uberAgent 6.0.0 events and properties.
-* uberagent-6.1.0: Compatible with uberAgent 6.1.0 events and properties.
-* uberagent-6.2.0: Compatible with uberAgent 6.2.0 events and properties.
-* uberagent-7.0.0: Compatible with uberAgent 7.0.0 events and properties.
-* uberagent-7.1.0: Compatible with uberAgent 7.1.0 events and properties.
-* uberagent-7.2.0: Compatible with uberAgent 7.2.0 events and properties.
-* uberagent-7.3.0: Compatible with uberAgent 7.3.0 events and properties.
 * uberagent-7.4.0: Compatible with uberAgent 7.4.0 events and properties.
+* uberagent-7.5.0: Compatible with uberAgent 7.5.0 events and properties.
 * uberagent-develop: Compatible with the upcoming uberAgent version.
 
 It supports the following output formats:
@@ -28,8 +22,8 @@ This backend is currently maintained by:
 * [vast limits GmbH](https://github.com/vastlimits/)
 
 # Usage
-This backend provides integration with the  [sigma-cli](https://github.com/SigmaHQ/sigma-cli) toolkit.
-While the sigma-cli's official documentation offers a comprehensive understanding of its functionalities, this guide specifically focuses on its usage in conjunction with the uberAgent backend.
+This backend provides integration with the [sigma-cli](https://github.com/SigmaHQ/sigma-cli) toolkit.
+While sigma-cli's official documentation offers a comprehensive understanding of its functionalities, this guide specifically focuses on its usage in conjunction with the uberAgent backend.
 
 Install the uberAgent backend:
 
@@ -44,9 +38,6 @@ sigma list pipelines
 +-------------------+----------+---------------------+-----------+
 | Identifier        | Priority | Processing Pipeline | Backends  |
 +-------------------+----------+---------------------+-----------+
-| uberagent-7.1.0   | 20       | uberAgent 7.1.0     | uberagent |
-| uberagent-7.2.0   | 20       | uberAgent 7.2.0     | uberagent |
-| uberagent-7.3.0   | 20       | uberAgent 7.3.0     | uberagent |
 | uberagent-7.4.0   | 20       | uberAgent 7.4.0     | uberagent |
 | uberagent-7.5.0   | 20       | uberAgent 7.5.0     | uberagent |
 | uberagent-develop | 20       | uberAgent develop   | uberagent |
@@ -64,10 +55,10 @@ sigma convert -s -f conf -p uberagent -t uberagent "..\sigma\rules\windows\proce
 
 Here,
 - `-f conf` specifies the output format as configuration blocks.
-- `-p uberagent` ensures the compatibility to the latest uberAgent version.
+- `-p uberagent` ensures compatibility with the latest uberAgent version.
 
 ### Targeting older uberAgent versions
-If you aim to support a prior version of uberAgent, specify the desired version in the pipeline.
+If you want to target a previous version of uberAgent, specify the desired version in the pipeline.
 
 For instance:
 
@@ -81,7 +72,7 @@ This command will generate configurations compatible with uberAgent version 7.0.
 Once the environment for sigma-cli and pySigma-uberAgent-backend is set up, you can leverage utility scripts to streamline the rule generation process.
 
 ### Default Rule Generation
-Execute the following commands to copy and convert the Sigma rules for the current released uberAgent version:
+Execute the following commands to copy and convert the Sigma rules for the currently released uberAgent version:
 
 ```
 cd pySigma-backend-uberAgent

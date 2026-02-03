@@ -1,10 +1,18 @@
+# Python
+**/__pycache__/
+.venv/
+
+# Testing
 .coverage*
-.vscode/
-**/__pycache__
 .pytest_cache/
 cov.xml
+
+# Build
+build/
 dist/
-docs/_build
+docs/_build/
+
+# Project-specific
 uberAgent-ESA-am-sigma-*.conf
-build/*
-.venv
+rules/
+out/

@@ -1,0 +1,187 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Copy Rules: Threat Hunting",
+      "type": "shell",
+      "command": "${workspaceFolder}/.venv/bin/python",
+      "args": [
+        "${workspaceFolder}/copy-rules.py",
+        "${env:HOME}/sigma/rules-threat-hunting",
+        "--skip_check_directory"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/rules"
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": true,
+        "clear": false
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Copy Rules: Emerging Threats",
+      "type": "shell",
+      "command": "${workspaceFolder}/.venv/bin/python",
+      "args": [
+        "${workspaceFolder}/copy-rules.py",
+        "${env:HOME}/sigma/rules-emerging-threats",
+        "--skip_check_directory"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/rules"
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": true,
+        "clear": false
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Copy Rules: Main Rules",
+      "type": "shell",
+      "command": "${workspaceFolder}/.venv/bin/python",
+      "args": [
+        "${workspaceFolder}/copy-rules.py",
+        "${env:HOME}/sigma/rules",
+        "--skip_check_directory"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/rules"
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": true,
+        "clear": false
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Copy All Rules",
+      "type": "shell",
+      "dependsOn": [
+        "Copy Rules: Main Rules",
+        "Copy Rules: Threat Hunting",
+        "Copy Rules: Emerging Threats"
+      ],
+      "dependsOrder": "sequence",
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": true,
+        "clear": false
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Convert Rules (uberagent, develop)",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "-c",
+        "source ~/sigma-cli/bin/activate && '${workspaceFolder}/convert-rules.sh' '${workspaceFolder}/rules' uberagent-develop develop"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/out"
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": true,
+        "clear": false
+      },
+      "problemMatcher": [
+        "$python"
+      ]
+    },
+    {
+      "label": "Convert Rules (uberagent, 7.5)",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "-c",
+        "source ~/sigma-cli/bin/activate && '${workspaceFolder}/convert-rules.sh' '${workspaceFolder}/rules' uberagent-7.5.0 7.5"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/out"
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": true,
+        "clear": false
+      },
+      "problemMatcher": [
+        "$python"
+      ]
+    },
+    {
+      "label": "Convert Rules (uberagent, 7.4)",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "-c",
+        "source ~/sigma-cli/bin/activate && '${workspaceFolder}/convert-rules.sh' '${workspaceFolder}/rules' uberagent-7.4.0 7.4"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/out"
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": true,
+        "clear": false
+      },
+      "problemMatcher": [
+        "$python"
+      ]
+    }
+  ]
+}

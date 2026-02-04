@@ -51,7 +51,8 @@ def select_rules(rules_path) -> dict:
     for file in yield_next_rule_file_path(rule_path=rules_path):
         rule_yaml = get_rule_yaml(file_path=file)
         if len(rule_yaml) != 1:
-            print("[E] rule {} is a multi-document file and will be skipped".format(file))
+            print(
+                "[E] rule {} is a multi-document file and will be skipped".format(file))
             continue
 
         rule = rule_yaml[0]
@@ -112,11 +113,11 @@ def main(args) -> int:
     if not args.skip_platform:
         for level in LEVEL:
             for platform in PLATFORM:
-                prepare_directory(f"sigma-{level}-{platform}", args.skip_check_directory)
+                prepare_directory(
+                    f"sigma-{level}-{platform}", args.skip_check_directory)
     else:
         for level in LEVEL:
             prepare_directory(f"sigma-{level}", args.skip_check_directory)
-
 
     print("[I] Parsing and selecting rules, this will take some time...")
     selected_rules = select_rules(args.rule_path)
@@ -127,10 +128,14 @@ def main(args) -> int:
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Creates directories with selected Sigma rules.")
-    parser.add_argument("rule_path", help="Path to the directory containing Sigma rule files.")
-    parser.add_argument("--skip_platform", help="Skips the platform identifier.", action=argparse.BooleanOptionalAction)
-    parser.add_argument("--skip_check_directory", help="Skips the output directory check.", action=argparse.BooleanOptionalAction)
+    parser = argparse.ArgumentParser(
+        description="Creates directories with selected Sigma rules.")
+    parser.add_argument(
+        "rule_path", help="Path to the directory containing Sigma rule files.")
+    parser.add_argument("--skip_platform", help="Skips the platform identifier.",
+                        action=argparse.BooleanOptionalAction)
+    parser.add_argument("--skip_check_directory",
+                        help="Skips the output directory check.", action=argparse.BooleanOptionalAction)
     args = parser.parse_args()
 
     sys.exit(main(args))

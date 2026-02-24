@@ -35,7 +35,7 @@ def ua_annotation(version: Version, tags: List[str], author: str) -> Optional[st
         result['mitre_attack'] = mitre_annotation_objects
 
     # New in upcoming version: Author is included in annotations.
-    if version.is_version_develop() and author is not None:
+    if version.is_version_7_2_or_newer() and author is not None:
         result['author'] = author
 
     if len(result.keys()) > 0:
@@ -47,7 +47,7 @@ def ua_annotation(version: Version, tags: List[str], author: str) -> Optional[st
 def ua_tag(name: str) -> str:
     """Converts the given Sigma rule name to uberagent ESA Tag property."""
     tag = name.lower().replace(" ", "-")
-    tag = re.sub(r"-{2,}", "-", tag, 0, re.IGNORECASE)
+    tag = re.sub(r"-{2,}", "-", tag, count=0, flags=re.IGNORECASE)
     return tag
 
 
@@ -284,7 +284,7 @@ class uberagent(TextQueryBackend):
         # This allows for adjustments to the syntax-specific aspects of rule generation.
 
         # Regular expressions are handled differntly in current development version.
-        if ua_backend_version.is_version_develop():
+        if ua_backend_version.is_version_7_2_or_newer():
             self.re_expression = '{field} regex "{regex}"'
 
         super().__init__(processing_pipeline, collect_errors)

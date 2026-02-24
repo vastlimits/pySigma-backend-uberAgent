@@ -15,7 +15,7 @@ Further, it contains the following processing pipelines in `sigma.pipelines.uber
 It supports the following output formats:
 
 * default: Generates plain uAQL queries.
-* conf: Generates `[ActivityMonitoringRule]` configuration blocks.
+* conf: Generates `[ThreatDetectionRule]` configuration blocks.
 
 This backend is currently maintained by:
 
@@ -90,7 +90,7 @@ cd pySigma-backend-uberAgent
 mkdir build
 cd build
 ../copy-rules.py "/path/to/sigma/rules"
-../convert-rules.sh $(pwd) uberagent-6.0.0
+../convert-rules.sh $(pwd) uberagent-7.5.0
 ```
 
 

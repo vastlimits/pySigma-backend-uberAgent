@@ -75,27 +75,15 @@ for dir in ${BASE_DIR}/*; do
         DIR_NAME=$(basename "$dir")
         OUTPUT_FILE="uberAgent-ESA-am-$DIR_NAME.conf"
 
-        # Define the header
-        HEADER="
-#
-# The rules are generated from the Sigma GitHub repository at https://github.com/SigmaHQ/sigma
-# To generate the ruleset, please follow the instructions provided in the repository: https://github.com/vastlimits/pySigma-backend-uberAgent/
-#
-# The command used to generate the ruleset is:
-#    sigma convert -s -f conf -p $PIPELINE -O backend_version=$BACKEND -t $TARGET $dir >> $OUTPUT_FILE
-#
-"
-
-        # Write the header to the output file
-        echo -e "$HEADER" > "$OUTPUT_FILE"
-
         # Run the sigma converter command and append the output to the file
         sigma convert -s -f conf -p "$PIPELINE" -O backend_version="$BACKEND" -t "$TARGET" "$dir" >> "$OUTPUT_FILE"
 
         # echo "Conversion completed, output saved to $OUTPUT_FILE"
 
         # Count the occurrences of [ActivityMonitoringRule] in the output file
-        RULE_COUNT=$(grep -o 'ActivityMonitoringRule' "$OUTPUT_FILE" | wc -l)
+        RULE_COUNT_AMR=$(grep -o 'ActivityMonitoringRule' "$OUTPUT_FILE" | wc -l)
+        RULE_COUNT_TDR=$(grep -o 'ThreatDetectionRule' "$OUTPUT_FILE" | wc -l)
+        RULE_COUNT=$(($RULE_COUNT_AMR + $RULE_COUNT_TDR))
 
         # Check if the file contains 0 rules
         if [ $RULE_COUNT -eq 0 ]; then

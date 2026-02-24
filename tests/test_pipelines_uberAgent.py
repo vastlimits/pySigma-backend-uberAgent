@@ -4,7 +4,7 @@ from sigma.exceptions import SigmaLevelError, SigmaTransformationError, SigmaTit
 
 from sigma.backends.uberagent import uberagent
 from sigma.backends.uberagent.exceptions import MissingPropertyException, MissingFunctionException
-from sigma.pipelines.uberagent import uberagent as uberagent_pipeline, uberagent600, uberagent610, uberagent620, uberagent700, uberagent710, uberagent_develop, uberagent_test
+from sigma.pipelines.uberagent import uberagent as uberagent_pipeline, uberagent600, uberagent610, uberagent620, uberagent700, uberagent710, uberagent720, uberagent730, uberagent740, uberagent_develop
 
 
 def test_ua_windows():
@@ -42,7 +42,7 @@ def test_ua_macos():
 
 def test_rule_process_creation():
     expected = \
-        '[ActivityMonitoringRule platform=Windows]\n' \
+        '[ThreatDetectionRule platform=Windows]\n' \
         'RuleId = 01234567-1234-5678-1234-567890123456\n' \
         'RuleName = Test\n' \
         'EventType = Process.Start\n' \
@@ -104,7 +104,7 @@ def test_rule_requires_title():
 
 def test_rule_description():
     expected = \
-        '[ActivityMonitoringRule platform=Windows]\n' \
+        '[ThreatDetectionRule platform=Windows]\n' \
         '# This is a test rule.\n' \
         'RuleId = 01234567-1234-5678-1234-567890123456\n' \
         'RuleName = Test\n' \
@@ -131,7 +131,7 @@ def test_rule_description():
 
 def test_rule_annotation():
     expected = \
-        '[ActivityMonitoringRule platform=Windows]\n' \
+        '[ThreatDetectionRule platform=Windows]\n' \
         '# This is a test rule.\n' \
         'RuleId = 01234567-1234-5678-1234-567890123456\n' \
         'RuleName = Test\n' \
@@ -163,7 +163,7 @@ def test_rule_annotation():
 
 def test_rule_annotation_with_author():
     expected = \
-        '[ActivityMonitoringRule platform=Windows]\n' \
+        '[ThreatDetectionRule platform=Windows]\n' \
         '# This is a test rule.\n' \
         '# Author: Unit Test\n' \
         'RuleId = 01234567-1234-5678-1234-567890123456\n' \
@@ -173,7 +173,7 @@ def test_rule_annotation_with_author():
         'Annotation = {"mitre_attack": ["T0001", "T0002"], "author": "Unit Test"}\n' \
         'Query = Process.Path == "test" and Process.CommandLine == "test"\n'
 
-    assert uberagent(processing_pipeline=uberagent_develop()).convert(
+    assert uberagent(processing_pipeline=uberagent720()).convert(
         SigmaCollection.from_yaml("""
             id: 01234567-1234-5678-1234-567890123456
             title: Test
@@ -197,7 +197,7 @@ def test_rule_annotation_with_author():
 
 def test_rule_annotation_with_author_without_mitre_tags():
     expected = \
-        '[ActivityMonitoringRule platform=Windows]\n' \
+        '[ThreatDetectionRule platform=Windows]\n' \
         '# This is a test rule.\n' \
         '# Author: Unit Test\n' \
         'RuleId = 01234567-1234-5678-1234-567890123456\n' \
@@ -207,7 +207,7 @@ def test_rule_annotation_with_author_without_mitre_tags():
         'Annotation = {"author": "Unit Test"}\n' \
         'Query = Process.Path == "test" and Process.CommandLine == "test"\n'
 
-    assert uberagent(processing_pipeline=uberagent_develop()).convert(
+    assert uberagent(processing_pipeline=uberagent720()).convert(
         SigmaCollection.from_yaml("""
             id: 01234567-1234-5678-1234-567890123456
             title: Test
@@ -228,7 +228,7 @@ def test_rule_annotation_with_author_without_mitre_tags():
 # Test "common" rule without specific product.
 def test_rule_network_any_common():
     expected = \
-        '[ActivityMonitoringRule]\n' \
+        '[ThreatDetectionRule]\n' \
         'RuleId = 01234567-1234-5678-1234-567890123456\n' \
         'RuleName = Test\n' \
         'EventType = Net.Any\n' \
@@ -277,7 +277,7 @@ def test_rule_unknown_risk_score():
 
 def test_rule_not_supported():
     with pytest.raises(Exception):
-        assert uberagent(processing_pipeline=uberagent_test("6.0.0")).convert(
+        assert uberagent(processing_pipeline=uberagent600()).convert(
             SigmaCollection.from_yaml("""
                 title: Test
                 id: 01234567-1234-5678-1234-567890123456
@@ -380,6 +380,57 @@ def test_uberagent710():
     ) == ['Process.Path == "test" and Process.CommandLine == "test"']
 
 
+def test_uberagent720():
+    assert uberagent(processing_pipeline=uberagent720()).convert(
+        SigmaCollection.from_yaml("""
+            title: Test
+            status: test
+            logsource:
+                product: windows
+                category: process_creation
+            detection:
+                sel:
+                    Image: test
+                    CommandLine: test
+                condition: sel
+        """)
+    ) == ['Process.Path == "test" and Process.CommandLine == "test"']
+
+
+def test_uberagent730():
+    assert uberagent(processing_pipeline=uberagent730()).convert(
+        SigmaCollection.from_yaml("""
+            title: Test
+            status: test
+            logsource:
+                product: windows
+                category: process_creation
+            detection:
+                sel:
+                    Image: test
+                    CommandLine: test
+                condition: sel
+        """)
+    ) == ['Process.Path == "test" and Process.CommandLine == "test"']
+
+
+def test_uberagent740():
+    assert uberagent(processing_pipeline=uberagent740()).convert(
+        SigmaCollection.from_yaml("""
+            title: Test
+            status: test
+            logsource:
+                product: windows
+                category: process_creation
+            detection:
+                sel:
+                    Image: test
+                    CommandLine: test
+                condition: sel
+        """)
+    ) == ['Process.Path == "test" and Process.CommandLine == "test"']
+
+
 def test_uberagent_develop():
     assert uberagent(processing_pipeline=uberagent_develop()).convert(
         SigmaCollection.from_yaml("""
@@ -414,7 +465,7 @@ def test_uberagent_620_isnull():
 
 
 def test_uberagent_registry_createkey():
-    assert uberagent(processing_pipeline=uberagent_develop()).convert(
+    assert uberagent(processing_pipeline=uberagent720()).convert(
         SigmaCollection.from_yaml("""
             title: Test
             status: test
@@ -429,7 +480,7 @@ def test_uberagent_registry_createkey():
 
 
 def test_uberagent_registry_deletekey():
-    assert uberagent(processing_pipeline=uberagent_develop()).convert(
+    assert uberagent(processing_pipeline=uberagent720()).convert(
         SigmaCollection.from_yaml("""
             title: Test
             status: test
@@ -444,7 +495,7 @@ def test_uberagent_registry_deletekey():
 
 
 def test_uberagent_registry_renamekey():
-    assert uberagent(processing_pipeline=uberagent_develop()).convert(
+    assert uberagent(processing_pipeline=uberagent720()).convert(
         SigmaCollection.from_yaml("""
             title: Test
             status: test
@@ -459,7 +510,7 @@ def test_uberagent_registry_renamekey():
 
 
 def test_uberagent_registry_deletevalue():
-    assert uberagent(processing_pipeline=uberagent_develop()).convert(
+    assert uberagent(processing_pipeline=uberagent720()).convert(
         SigmaCollection.from_yaml("""
             title: Test
             status: test
@@ -474,7 +525,7 @@ def test_uberagent_registry_deletevalue():
 
 
 def test_uberagent_registry_setvalue():
-    assert uberagent(processing_pipeline=uberagent_develop()).convert(
+    assert uberagent(processing_pipeline=uberagent720()).convert(
         SigmaCollection.from_yaml("""
             title: Test
             status: test
@@ -490,7 +541,7 @@ def test_uberagent_registry_setvalue():
 
 def test_uberagent_registry_unsupported_createvalue():
     with pytest.raises(SigmaTransformationError):
-        uberagent(processing_pipeline=uberagent_develop()).convert(
+        uberagent(processing_pipeline=uberagent720()).convert(
             SigmaCollection.from_yaml("""
                 title: Test
                 status: test
@@ -506,7 +557,7 @@ def test_uberagent_registry_unsupported_createvalue():
 
 def test_uberagent_registry_unsupported_renamevalue():
     with pytest.raises(SigmaTransformationError):
-        uberagent(processing_pipeline=uberagent_develop()).convert(
+        uberagent(processing_pipeline=uberagent720()).convert(
             SigmaCollection.from_yaml("""
                 title: Test
                 status: test

@@ -9,10 +9,14 @@ UA_VERSION_6_1 = "6.1.0"
 UA_VERSION_6_2 = "6.2.0"
 UA_VERSION_7_0 = "7.0.0"
 UA_VERSION_7_1 = "7.1.0"
+UA_VERSION_7_2 = "7.2.0"
+UA_VERSION_7_3 = "7.3.0"
+UA_VERSION_7_4 = "7.4.0"
+UA_VERSION_7_5 = "7.5.0"
 
-# Represents the next upcoming version (version number not yet assigned)
+# Represents the next upcoming version
 UA_VERSION_DEVELOP = "develop"
-UA_VERSION_CURRENT_RELEASE = UA_VERSION_7_1
+UA_VERSION_CURRENT_RELEASE = UA_VERSION_7_4
 
 
 class Version:
@@ -59,6 +63,18 @@ class Version:
 
     def is_version_7_1_or_newer(self) -> bool:
         return self.is_version_develop() or self._version() >= self._version_tuple(UA_VERSION_7_1)
+
+    def is_version_7_2_or_newer(self) -> bool:
+        return self.is_version_develop() or self._version() >= self._version_tuple(UA_VERSION_7_2)
+
+    def is_version_7_3_or_newer(self) -> bool:
+        return self.is_version_develop() or self._version() >= self._version_tuple(UA_VERSION_7_3)
+
+    def is_version_7_4_or_newer(self) -> bool:
+        return self.is_version_develop() or self._version() >= self._version_tuple(UA_VERSION_7_4)
+    
+    def is_version_7_5_or_newer(self) -> bool:
+        return self.is_version_develop() or self._version() >= self._version_tuple(UA_VERSION_7_5)
 
     def is_version_develop(self) -> bool:
         return self._outputVersion == UA_VERSION_DEVELOP
@@ -130,6 +146,15 @@ class Version:
         if self.is_version_7_1_or_newer() and field.version == UA_VERSION_7_1:
             return True
 
+        if self.is_version_7_2_or_newer() and field.version == UA_VERSION_7_2:
+            return True
+
+        if self.is_version_7_3_or_newer() and field.version == UA_VERSION_7_3:
+            return True
+
+        if self.is_version_7_4_or_newer() and field.version == UA_VERSION_7_4:
+            return True
+
         if self.is_version_develop() and field.version == UA_VERSION_DEVELOP:
             return True
 
@@ -160,6 +185,15 @@ class Version:
             return True
 
         if self.is_version_7_1_or_newer() and logsource.version == UA_VERSION_7_1:
+            return True
+
+        if self.is_version_7_2_or_newer() and logsource.version == UA_VERSION_7_2:
+            return True
+
+        if self.is_version_7_3_or_newer() and logsource.version == UA_VERSION_7_3:
+            return True
+
+        if self.is_version_7_4_or_newer() and logsource.version == UA_VERSION_7_4:
             return True
 
         if self.is_version_develop() and logsource.version == UA_VERSION_DEVELOP:

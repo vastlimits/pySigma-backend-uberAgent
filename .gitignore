@@ -17,3 +17,4 @@ uberAgent-ESA-am-sigma-*.conf
 rules/
 out/
 build/*
+.venv

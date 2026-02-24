@@ -13,10 +13,10 @@ from sigma.processing.transformations import RuleFailureTransformation, SetState
 from sigma.pipelines.uberagent.condition import ExcludeFieldConditionLowercase, IncludeFieldConditionLowercase
 from sigma.pipelines.uberagent.field import Field
 from sigma.pipelines.uberagent.logsource import Logsource
-from sigma.pipelines.uberagent.transformation import ChangeLogsourceCategoryTransformation, ChangeLogsourceCategoryTransformationWindows, FieldMappingTransformationLowercase, \
+from sigma.pipelines.uberagent.transformation import ChangeLogsourceCategoryTransformation, FieldMappingTransformationLowercase, \
     FieldDetectionItemFailureTransformation, ReferencedFieldTransformation
 from sigma.pipelines.uberagent.version import UA_VERSION_6_0, UA_VERSION_6_1, UA_VERSION_6_2, UA_VERSION_7_0, \
-    UA_VERSION_7_1, UA_VERSION_DEVELOP, UA_VERSION_CURRENT_RELEASE, Version
+    UA_VERSION_7_1, UA_VERSION_7_2, UA_VERSION_7_3, UA_VERSION_7_4, UA_VERSION_7_5, UA_VERSION_DEVELOP, UA_VERSION_CURRENT_RELEASE, Version
 
 # Maps all known Sigma fields to uberAgent Process Event Properties
 # Note: The process properties are re-usable for all event types as all events are linked to a process.
@@ -161,11 +161,11 @@ ua_registry_event_mapping: Dict[str, Field] = {
     # ""                    : Field(UA_VERSION_6_0, "Reg.File.Name"),
     # ""                    : Field(UA_VERSION_6_0, "Reg.Key.Sddl"),
     # ""                    : Field(UA_VERSION_6_0, "Reg.Key.Hive"),
-    "targetobject"          : Field(UA_VERSION_DEVELOP, "Reg.TargetObject"),
-    "details"               : Field(UA_VERSION_DEVELOP, "Reg.Value.Data"),
-    # ""                    : Field(UA_VERSION_DEVELOP, "Reg.Value.Data.Number")
-    # ""                    : Field(UA_VERSION_DEVELOP, "Reg.Value.Data.String")
-    "eventtype"             : Field(UA_VERSION_DEVELOP, "Reg.EventType")
+    "targetobject"          : Field(UA_VERSION_7_2, "Reg.TargetObject"),
+    "details"               : Field(UA_VERSION_7_2, "Reg.Value.Data"),
+    # ""                    : Field(UA_VERSION_7_2, "Reg.Value.Data.Number")
+    # ""                    : Field(UA_VERSION_7_2, "Reg.Value.Data.String")
+    "eventtype"             : Field(UA_VERSION_7_2, "Reg.EventType")
     # ""                    : Field(UA_VERSION_7_1, "Reg.Value.Type")
 }
 
@@ -596,6 +596,46 @@ def uberagent710() -> ProcessingPipeline:
     return make_pipeline(Version(UA_VERSION_7_1))
 
 
+def uberagent720() -> ProcessingPipeline:
+    """
+    Create a processing pipeline for version 7.2 of uberAgent.
+
+    Returns:
+    - ProcessingPipeline: The assembled processing pipeline for version 7.2.
+    """
+    return make_pipeline(Version(UA_VERSION_7_2))
+
+
+def uberagent730() -> ProcessingPipeline:
+    """
+    Create a processing pipeline for version 7.3 of uberAgent.
+
+    Returns:
+    - ProcessingPipeline: The assembled processing pipeline for version 7.3.
+    """
+    return make_pipeline(Version(UA_VERSION_7_3))
+
+
+def uberagent740() -> ProcessingPipeline:
+    """
+    Create a processing pipeline for version 7.4 of uberAgent.
+
+    Returns:
+    - ProcessingPipeline: The assembled processing pipeline for version 7.4.
+    """
+    return make_pipeline(Version(UA_VERSION_7_4))
+
+
+def uberagent750() -> ProcessingPipeline:
+    """
+    Create a processing pipeline for version 7.5 of uberAgent.
+
+    Returns:
+    - ProcessingPipeline: The assembled processing pipeline for version 7.5.
+    """
+    return make_pipeline(Version(UA_VERSION_7_5))
+
+
 def uberagent_develop() -> ProcessingPipeline:
     """
     Create a processing pipeline for the development version of uberAgent.
@@ -604,13 +644,3 @@ def uberagent_develop() -> ProcessingPipeline:
     - ProcessingPipeline: The assembled processing pipeline for the development version.
     """
     return make_pipeline(Version(UA_VERSION_DEVELOP))
-
-
-def uberagent_test(version: str = UA_VERSION_DEVELOP) -> ProcessingPipeline:
-    """
-    Create a processing pipeline for the given version of uberAgent.
-
-    Returns:
-    - ProcessingPipeline: The assembled processing pipeline for the development version.
-    """
-    return make_pipeline(Version(version))

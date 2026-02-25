@@ -4,7 +4,7 @@ from sigma.exceptions import SigmaLevelError, SigmaTransformationError, SigmaTit
 
 from sigma.backends.uberagent import uberagent
 from sigma.backends.uberagent.exceptions import MissingPropertyException, MissingFunctionException
-from sigma.pipelines.uberagent import uberagent as uberagent_pipeline, uberagent600, uberagent610, uberagent620, uberagent700, uberagent710, uberagent720, uberagent730, uberagent740, uberagent_develop
+from sigma.pipelines.uberagent import uberagent as uberagent_pipeline, uberagent600, uberagent610, uberagent620, uberagent700, uberagent710, uberagent720, uberagent730, uberagent740, uberagent750, uberagent760, uberagent_develop
 
 
 def test_ua_windows():
@@ -569,3 +569,67 @@ def test_uberagent_registry_unsupported_renamevalue():
                         EventType: RenameValue
                     condition: sel
             """))
+
+
+def test_reg_any_uA75():
+    expected = \
+        '[ThreatDetectionRule platform=Windows]\n' \
+        '# This is a test rule.\n' \
+        'RuleId = 01234567-1234-5678-1234-567890123456\n' \
+        'RuleName = Test\n' \
+        'EventType = Reg.Any\n' \
+        'Tag = test\n' \
+        'Query = Process.Path == "test" and Process.CommandLine == "test"\n' \
+        'Hive = HKLM,HKU\n'
+
+    assert uberagent(processing_pipeline=uberagent750()).convert(
+        SigmaCollection.from_yaml("""
+            id: 01234567-1234-5678-1234-567890123456
+            title: Test
+            description: This is a test rule.
+            status: test
+            logsource:
+                product: windows
+                category: registry_event
+            detection:
+                sel:
+                    Image: test
+                    CommandLine: test
+                condition: sel
+        """), "conf") == [expected]
+
+def test_reg_event_uA76():
+    expected = \
+        '[ThreatDetectionRule platform=Windows]\n' \
+        '# This is a test rule.\n' \
+        'RuleId = 01234567-1234-5678-1234-567890123456\n' \
+        'RuleName = Test\n' \
+        'EventType = Reg.Key.Create\n' \
+        'EventType = Reg.Value.Write\n' \
+        'EventType = Reg.Key.Delete\n' \
+        'EventType = Reg.Value.Delete\n' \
+        'EventType = Reg.Key.Rename\n' \
+        'EventType = Reg.Key.Load\n' \
+        'EventType = Reg.Key.Unload\n' \
+        'EventType = Reg.Key.Save\n' \
+        'EventType = Reg.Key.Restore\n' \
+        'EventType = Reg.Key.Replace\n' \
+        'Tag = test\n' \
+        'Query = Process.Path == "test" and Process.CommandLine == "test"\n' \
+        'Hive = HKLM,HKU\n'
+
+    assert uberagent(processing_pipeline=uberagent760()).convert(
+        SigmaCollection.from_yaml("""
+            id: 01234567-1234-5678-1234-567890123456
+            title: Test
+            description: This is a test rule.
+            status: test
+            logsource:
+                product: windows
+                category: registry_event
+            detection:
+                sel:
+                    Image: test
+                    CommandLine: test
+                condition: sel
+        """), "conf") == [expected]

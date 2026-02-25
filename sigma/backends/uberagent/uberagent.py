@@ -286,6 +286,11 @@ class uberagent(TextQueryBackend):
         # Regular expressions are handled differntly in current development version.
         if ua_backend_version.is_version_7_2_or_newer():
             self.re_expression = '{field} regex "{regex}"'
+        
+        if ua_backend_version.is_version_7_6_or_newer():
+            self.startswith_expression = "istartswith({field}, {value})"
+            self.endswith_expression = "iendswith({field}, {value})"
+            self.contains_expression = "icontains({field}, {value})"
 
         super().__init__(processing_pipeline, collect_errors)
 

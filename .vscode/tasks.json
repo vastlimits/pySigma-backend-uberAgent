@@ -157,12 +157,12 @@
       ]
     },
     {
-      "label": "Convert Rules (uberagent, 7.4)",
+      "label": "Convert Rules (uberagent, 8.0)",
       "type": "shell",
       "command": "bash",
       "args": [
         "-c",
-        "source ~/sigma-cli/bin/activate && '${workspaceFolder}/convert-rules.sh' '${workspaceFolder}/rules' uberagent-7.4.0 7.4"
+        "source ~/sigma-cli/bin/activate && '${workspaceFolder}/convert-rules.sh' '${workspaceFolder}/rules' uberagent-8.0.0 8.0"
       ],
       "options": {
         "cwd": "${workspaceFolder}/out"

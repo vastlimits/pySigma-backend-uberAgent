@@ -4,7 +4,7 @@ from sigma.exceptions import SigmaLevelError, SigmaTransformationError, SigmaTit
 
 from sigma.backends.uberagent import uberagent
 from sigma.backends.uberagent.exceptions import MissingPropertyException, MissingFunctionException
-from sigma.pipelines.uberagent import uberagent as uberagent_pipeline, uberagent600, uberagent610, uberagent620, uberagent700, uberagent710, uberagent720, uberagent730, uberagent740, uberagent750, uberagent760, uberagent_develop
+from sigma.pipelines.uberagent import uberagent as uberagent_pipeline, uberagent600, uberagent610, uberagent620, uberagent700, uberagent710, uberagent720, uberagent730, uberagent740, uberagent750, uberagent800, uberagent_develop
 
 
 def test_ua_windows():
@@ -598,7 +598,7 @@ def test_reg_any_uA75():
                 condition: sel
         """), "conf") == [expected]
 
-def test_reg_event_uA76():
+def test_reg_event_uA80():
     expected = \
         '[ThreatDetectionRule platform=Windows]\n' \
         '# This is a test rule.\n' \
@@ -618,7 +618,7 @@ def test_reg_event_uA76():
         'Query = Process.Path == "test" and Process.CommandLine == "test"\n' \
         'Hive = HKLM,HKU\n'
 
-    assert uberagent(processing_pipeline=uberagent760()).convert(
+    assert uberagent(processing_pipeline=uberagent800()).convert(
         SigmaCollection.from_yaml("""
             id: 01234567-1234-5678-1234-567890123456
             title: Test

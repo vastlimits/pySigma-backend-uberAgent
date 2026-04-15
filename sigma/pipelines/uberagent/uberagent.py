@@ -16,7 +16,7 @@ from sigma.pipelines.uberagent.logsource import Logsource
 from sigma.pipelines.uberagent.transformation import ChangeLogsourceCategoryTransformation, FieldMappingTransformationLowercase, \
     FieldDetectionItemFailureTransformation, ReferencedFieldTransformation
 from sigma.pipelines.uberagent.version import UA_VERSION_6_0, UA_VERSION_6_1, UA_VERSION_6_2, UA_VERSION_7_0, \
-    UA_VERSION_7_1, UA_VERSION_7_2, UA_VERSION_7_3, UA_VERSION_7_4, UA_VERSION_7_5, UA_VERSION_7_6, UA_VERSION_DEVELOP, UA_VERSION_CURRENT_RELEASE, Version
+    UA_VERSION_7_1, UA_VERSION_7_2, UA_VERSION_7_3, UA_VERSION_7_4, UA_VERSION_7_5, UA_VERSION_8_0, UA_VERSION_DEVELOP, UA_VERSION_CURRENT_RELEASE, Version
 
 # Maps all known Sigma fields to uberAgent Process Event Properties
 # Note: The process properties are re-usable for all event types as all events are linked to a process.
@@ -336,30 +336,30 @@ ua_categories: List[Logsource] = [
               ],
               fields=ua_registry_event_mapping),
 
-    Logsource(UA_VERSION_7_6,
+    Logsource(UA_VERSION_8_0,
               "Reg.Key.Create,Reg.Value.Write,Reg.Key.Delete,Reg.Value.Delete,Reg.Key.Rename,Reg.Key.Load,Reg.Key.Unload,Reg.Key.Save,Reg.Key.Restore,Reg.Key.Replace",
               conditions=[
                  logsource_windows_registry_event(),
-              ],
-              fields=ua_registry_event_mapping),
+               ],
+               fields=ua_registry_event_mapping),
 
-    Logsource(UA_VERSION_7_6, "Reg.Key.Create,Reg.Value.Write,Reg.Key.Rename,Reg.Key.Restore,Reg.Key.Replace",
+    Logsource(UA_VERSION_8_0, "Reg.Key.Create,Reg.Value.Write,Reg.Key.Rename,Reg.Key.Restore,Reg.Key.Replace",
               conditions=[
                  logsource_windows_registry_add(),
-              ],
-              fields=ua_registry_event_mapping),
+               ],
+               fields=ua_registry_event_mapping),
 
-    Logsource(UA_VERSION_7_6, "Reg.Delete",
+    Logsource(UA_VERSION_8_0, "Reg.Delete",
               conditions=[
                  logsource_windows_registry_delete(),
-              ],
-              fields=ua_registry_event_mapping),
+               ],
+               fields=ua_registry_event_mapping),
 
-    Logsource(UA_VERSION_7_6, "Reg.Value.Write,Reg.Key.Rename,Reg.Key.Restore,Reg.Key.Replace",
+    Logsource(UA_VERSION_8_0, "Reg.Value.Write,Reg.Key.Rename,Reg.Key.Restore,Reg.Key.Replace",
               conditions=[
                  logsource_windows_registry_set()
-              ],
-              fields=ua_registry_event_mapping),
+               ],
+               fields=ua_registry_event_mapping),
 
     #
     # DNS Query Events
@@ -665,14 +665,14 @@ def uberagent750() -> ProcessingPipeline:
     """
     return make_pipeline(Version(UA_VERSION_7_5))
 
-def uberagent760() -> ProcessingPipeline:
+def uberagent800() -> ProcessingPipeline:
     """
-    Create a processing pipeline for version 7.6 of uberAgent.
+    Create a processing pipeline for version 8.0 of uberAgent.
 
     Returns:
-    - ProcessingPipeline: The assembled processing pipeline for version 7.6.
+    - ProcessingPipeline: The assembled processing pipeline for version 8.0.
     """
-    return make_pipeline(Version(UA_VERSION_7_6))
+    return make_pipeline(Version(UA_VERSION_8_0))
 
 def uberagent_develop() -> ProcessingPipeline:
     """

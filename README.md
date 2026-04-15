@@ -8,8 +8,8 @@ This is the uAQL backend for pySigma. It provides the package `sigma.backends.ub
 Further, it contains the following processing pipelines in `sigma.pipelines.uberAgent`:
 
 * uberagent: Compatible with the latest released uberAgent version.
-* uberagent-7.4.0: Compatible with uberAgent 7.4.0 events and properties.
 * uberagent-7.5.0: Compatible with uberAgent 7.5.0 events and properties.
+* uberagent-8.0.0: Compatible with uberAgent 8.0.0 events and properties.
 * uberagent-develop: Compatible with the upcoming uberAgent version.
 
 It supports the following output formats:
@@ -38,8 +38,8 @@ sigma list pipelines
 +-------------------+----------+---------------------+-----------+
 | Identifier        | Priority | Processing Pipeline | Backends  |
 +-------------------+----------+---------------------+-----------+
-| uberagent-7.4.0   | 20       | uberAgent 7.4.0     | uberagent |
 | uberagent-7.5.0   | 20       | uberAgent 7.5.0     | uberagent |
+| uberagent-8.0.0   | 20       | uberAgent 8.0.0     | uberagent |
 | uberagent-develop | 20       | uberAgent develop   | uberagent |
 +-------------------+----------+---------------------+-----------+
 ```
@@ -90,7 +90,7 @@ cd pySigma-backend-uberAgent
 mkdir build
 cd build
 ../copy-rules.py "/path/to/sigma/rules"
-../convert-rules.sh $(pwd) uberagent-7.5.0
+../convert-rules.sh $(pwd) uberagent-8.0.0
 ```
 
 

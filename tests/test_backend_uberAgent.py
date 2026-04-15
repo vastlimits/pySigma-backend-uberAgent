@@ -8,8 +8,13 @@ def uberAgent_backend():
     return uberagent()
 
 @pytest.fixture
-def uberAgent76_backend():
-    return uberagent(backend_version="7.6.0")
+def uberAgent75_backend():
+    return uberagent(backend_version="7.5.0")
+
+
+@pytest.fixture
+def uberAgent80_backend():
+    return uberagent(backend_version="8.0.0")
 
 
 def test_uberAgent_and_expression(uberAgent_backend: uberagent):
@@ -106,11 +111,30 @@ def test_uberAgent_in_expression(uberAgent_backend: uberagent):
                         - valueC*
                 condition: sel
         """)
+    ) == ['fieldA == "valueA" or fieldA == "valueB" or istartswith(fieldA, "valueC")']
+
+
+def test_uberAgent75_in_expression(uberAgent75_backend: uberagent):
+    assert uberAgent75_backend.convert(
+        SigmaCollection.from_yaml("""
+            title: Test
+            status: test
+            logsource:
+                category: test_category
+                product: test_product
+            detection:
+                sel:
+                    fieldA:
+                        - valueA
+                        - valueB
+                        - valueC*
+                condition: sel
+        """)
     ) == ['fieldA == "valueA" or fieldA == "valueB" or fieldA like r"valueC%"']
 
 
-def test_uberAgent76_in_expression(uberAgent76_backend: uberagent):
-    assert uberAgent76_backend.convert(
+def test_uberAgent80_in_expression(uberAgent80_backend: uberagent):
+    assert uberAgent80_backend.convert(
         SigmaCollection.from_yaml("""
             title: Test
             status: test
@@ -141,11 +165,27 @@ def test_uberAgent_cidr_query(uberAgent_backend: uberagent):
                     field|cidr: 192.168.0.0/16
                 condition: sel
         """)
+    ) == ['istartswith(field, "192.168.")']
+
+
+def test_uberAgent75_cidr_query(uberAgent75_backend: uberagent):
+    assert uberAgent75_backend.convert(
+        SigmaCollection.from_yaml("""
+            title: Test
+            status: test
+            logsource:
+                category: test_category
+                product: test_product
+            detection:
+                sel:
+                    field|cidr: 192.168.0.0/16
+                condition: sel
+        """)
     ) == ['field like r"192.168.%"']
 
 
-def test_uberAgent76_cidr_query(uberAgent76_backend: uberagent):
-    assert uberAgent76_backend.convert(
+def test_uberAgent80_cidr_query(uberAgent80_backend: uberagent):
+    assert uberAgent80_backend.convert(
         SigmaCollection.from_yaml("""
             title: Test
             status: test

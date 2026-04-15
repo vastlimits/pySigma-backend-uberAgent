@@ -30,7 +30,7 @@ jobs:
         if: ${{ runner.os == 'Linux' }}
         run: poetry run python print-coverage.py >> $GITHUB_ENV
       - name: Create coverage badge
-        if: ${{ github.repository == 'vastlimits/pySigma-backend-uberAgent' && github.event_name == 'push' && runner.os == 'Linux' && github.ref_name == 'main' && matrix.python-version == '3.10' && secrets.GIST_SECRET != '' }}
+        if: ${{ github.repository == 'vastlimits/pySigma-backend-uberAgent' && github.event_name == 'push' && runner.os == 'Linux' && github.ref_name == 'main' && matrix.python-version == '3.10' }}
         continue-on-error: true
         uses: schneegans/dynamic-badges-action@v1.7.0
         with:
